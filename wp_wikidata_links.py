@@ -19,8 +19,8 @@ import config as cfg
 
 #ENTITY_TYPE = sys.argv[1] if len(sys.argv) > 1 else 'artist'
 
-WIKIPEDIA_RELATIONSHIP_TYPES = {'artist': 179, 'label': 216, 'release-group': 89, 'work': 279, 'area': 355, 'place': 595}
-WIKIDATA_RELATIONSHIP_TYPES = {'artist': 352, 'label': 354, 'release-group': 353, 'work': 351, 'area': 358, 'place': 594}
+WIKIPEDIA_RELATIONSHIP_TYPES = {'artist': 179, 'label': 216, 'release-group': 89, 'work': 279, 'area': 355, 'place': 595, 'series': 744, 'instrument': 731}
+WIKIDATA_RELATIONSHIP_TYPES = {'artist': 352, 'label': 354, 'release-group': 353, 'work': 351, 'area': 358, 'place': 594, 'series': 749, 'instrument': 733}
 
 engine = sqlalchemy.create_engine(cfg.MB_DB)
 db = engine.connect()
@@ -97,7 +97,7 @@ def main(ENTITY_TYPE):
 stats = {'seen': {}, 'matched': {}}
 if __name__ == '__main__':
     with PIDFile('/tmp/mbbot_wp_wikidata_links.pid'):
-        ENTITY_TYPES = ('place', 'release-group', 'artist', 'work', 'label')
+        ENTITY_TYPES = ('instrument', 'series', 'place', 'release-group', 'artist', 'work', 'label')
         if len(sys.argv) > 1 and sys.argv[1] in ENTITY_TYPES:
             main(sys.argv[1])
         else:
