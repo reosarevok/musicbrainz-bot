@@ -20,7 +20,7 @@ except ImportError:
     cfg_caa = cfg
 
 try:
-    import discogs_client as discogs
+    import discogs_client
 except ImportError as err:
     colored_out(bcolors.FAIL,
                 "Error: Cannot use Discogs: %s\n" % err +
@@ -57,7 +57,7 @@ db.execute("SET search_path TO musicbrainz, %s, public" % cfg.BOT_SCHEMA_DB)
 monkeypatch_mechanize()
 mb = MusicBrainzClient(cfg_caa.MB_USERNAME, cfg_caa.MB_PASSWORD, cfg_caa.MB_SITE)
 
-discogs.user_agent = 'MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot'
+discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
 
 consumer = oauth2.Consumer(cfg.DISCOGS_OAUTH_CONSUMER_KEY, cfg.DISCOGS_OAUTH_CONSUMER_SECRET)
 token_obj = oauth2.Token(cfg.DISCOGS_OAUTH_TOKEN_KEY, cfg.DISCOGS_OAUTH_TOKEN_SECRET)
@@ -198,13 +198,13 @@ def discogs_get_primary_image(url):
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', url)
     if m:
         release_id = int(m.group(1))
-        release = discogs.Release(release_id)
-        if 'images' in release.data and len(release.data['images']) >= 1:
-            for image in release.data['images']:
+        release = discogs.release(release_id)
+        if release.images is not None and len(release.images) >= 1:
+            for image in release.images:
                 if image['type'] == 'primary':
                     return image
             # No primary image found => return first images
-            return release.data['images'][0]
+            return release.images[0]
     return None
     
 
@@ -215,10 +215,10 @@ def discogs_get_secondary_images(url):
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', url)
     if m:
         release_id = int(m.group(1))
-        release = discogs.Release(release_id)
-        if 'images' in release.data and len(release.data['images']) >= 2:
+        release = discogs.release(release_id)
+        if release.images is not None and len(release.images) >= 2:
             found_primary = False
-            for image in release.data['images']:
+            for image in release.images:
                 if image['type'] == 'secondary':
                     images.append(image)
                 elif image['type'] == 'primary':

@@ -4,7 +4,7 @@ import re
 import sqlalchemy
 import solr
 from editing import MusicBrainzClient
-import discogs_client as discogs
+import discogs_client
 import pprint
 import urllib
 import time
@@ -17,7 +17,7 @@ db.execute("SET search_path TO musicbrainz, %s" % cfg.BOT_SCHEMA_DB)
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
-discogs.user_agent = 'MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot'
+discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
 
 """
 CREATE TABLE bot_discogs_medium_format (
@@ -54,9 +54,9 @@ LIMIT 1000
 
 
 def discogs_get_medium_format(release, medium_no):
-    if len(release.data['formats']) > 1:
+    if release.formats is not None and len(release.formats) > 1:
         return None
-    for format in release.data['formats']:
+    for format in release.formats:
         if format['name'] == 'CD':
             return 'CD'
         elif format['name'] == 'CDr':
@@ -92,7 +92,7 @@ for medium in db.execute(query):
 
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', medium['discogs_url'])
     if m:
-        discogs_release = discogs.Release(int(m.group(1)))
+        discogs_release = discogs.release(int(m.group(1)))
 
     discogs_format = discogs_get_medium_format(discogs_release, medium['position'])
     if discogs_format:

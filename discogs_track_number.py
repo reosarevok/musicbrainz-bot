@@ -3,7 +3,7 @@
 import re
 import sqlalchemy
 from editing import MusicBrainzClient
-import discogs_client as discogs
+import discogs_client
 import time
 import Levenshtein
 from utils import mangle_name, join_names, out, colored_out, bcolors, durationToMS, msToDuration, unaccent
@@ -15,7 +15,7 @@ db.execute("SET search_path TO musicbrainz, %s" % cfg.BOT_SCHEMA_DB)
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
-discogs.user_agent = 'MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot'
+discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
 
 """
 CREATE TABLE bot_discogs_track_number (
@@ -39,6 +39,7 @@ WITH
             /* this release should not have another Discogs link attached */
             AND NOT EXISTS (SELECT 1 FROM l_release_url WHERE l_release_url.entity0 = r.id AND l_release_url.entity1 <> u.id
                                     AND l_release_url.link IN (SELECT id FROM link WHERE link_type = 76))
+            AND EXISTS (SELECT 1 FROM track t WHERE t.medium = m.id AND t.number ~ '^\d+$')
             AND l.edits_pending = 0
             AND r.edits_pending = 0
     )
@@ -61,7 +62,6 @@ WHERE m.release = %s
 ORDER by m.position, t.position
 """
 
-
 def are_similar(name1, name2):
     name1, name2 = (mangle_name(s) for s in (name1, name2))
     ratio = Levenshtein.jaro_winkler(name1, name2)
@@ -70,13 +70,12 @@ def are_similar(name1, name2):
         print " * ratio = %s => name1 = '%s' vs name2 = '%s'" % (ratio, name1, name2)
     return ratio >= 0.8
 
-
 def discogs_get_tracklist(release_url):
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', release_url)
     if m:
         release_id = int(m.group(1))
-        release = discogs.Release(release_id)
-        return [track for track in release.data['tracklist'] if track['position'] != '']
+        release = discogs.release(release_id)
+        return [track for track in release.tracklist if track['position'] != '']
     return None
 
 for release in db.execute(query):

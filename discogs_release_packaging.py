@@ -4,7 +4,7 @@ import re
 import sqlalchemy
 import solr
 from editing import MusicBrainzClient
-import discogs_client as discogs
+import discogs_client
 import pprint
 import urllib
 import time
@@ -17,7 +17,7 @@ db.execute("SET search_path TO musicbrainz, %s" % cfg.BOT_SCHEMA_DB)
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
-discogs.user_agent = 'MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot'
+discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
 
 """
 CREATE TABLE bot_discogs_release_packaging (
@@ -55,7 +55,7 @@ LIMIT 5000
 def discogs_get_release_packaging(discogs_release):
     #if len(discogs_release.data['formats']) > 1:
     #    return None
-    for format in discogs_release.data['formats']:
+    for format in discogs_release.formats:
 
         if 'text' not in format:
             print 'No text found for format %s' % format['name']
@@ -92,7 +92,7 @@ for release in db.execute(query):
 
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', release['discogs_url'])
     if m:
-        discogs_release = discogs.Release(int(m.group(1)))
+        discogs_release = discogs.release(int(m.group(1)))
 
     discogs_packaging = discogs_get_release_packaging(discogs_release)
     if discogs_packaging:

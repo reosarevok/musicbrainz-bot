@@ -7,7 +7,7 @@ import socket
 
 import sqlalchemy
 import Levenshtein
-import discogs_client as discogs
+import discogs_client
 
 from editing import MusicBrainzClient
 from utils import out
@@ -33,7 +33,7 @@ db.execute('SET search_path TO musicbrainz')
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
-discogs.user_agent = 'MusicBrainzDiscogsReleaseGroupsBot/0.1 +https://github.com/weisslj/musicbrainz-bot'
+discogs = discogs_client.Client('MusicBrainzDiscogsReleaseGroupsBot/0.1 +https://github.com/weisslj/musicbrainz-bot')
 
 query_missing = '''
 SELECT r.id, r.gid, tn.name, t.position, m.position, url.url, a.id, a.gid, ac.id
@@ -185,7 +185,7 @@ def main(verbose=False):
             out('%s' % url)
             out('http://musicbrainz.org/artist/%s' % a_gid)
         discogs_release_id = int(re.match(r'^http://www\.discogs\.com/release/([0-9]+)', url).group(1))
-        discogs_release = discogs.Release(discogs_release_id)
+        discogs_release = discogs.release(discogs_release_id)
         t_index = 0
         discogs_track = None
         for t in discogs_release.tracklist:
