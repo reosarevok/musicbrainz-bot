@@ -89,7 +89,7 @@ else:
 query = """
 WITH
     releases_wo_coverart AS (
-        SELECT r.id, discogs_url.url as discogs_url, amz_url.url AS amz_url
+        SELECT DISTINCT r.id, discogs_url.url as discogs_url, amz_url.url AS amz_url
         FROM release r
             JOIN release_meta rm ON rm.id = r.id
             JOIN release_group rg ON r.release_group = rg.id
