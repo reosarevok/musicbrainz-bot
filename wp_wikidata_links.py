@@ -53,7 +53,7 @@ def main(ENTITY_TYPE):
                 JOIN """ + url_relationship_table + """ l ON l.""" + main_entity_entity_point + """ = e.id AND l.link IN (SELECT id FROM link WHERE link_type = """ + str(WIKIPEDIA_RELATIONSHIP_TYPES[ENTITY_TYPE]) + """)
                 JOIN url u ON u.id = l.""" + url_entity_point + """ AND u.url LIKE 'http://%%.wikipedia.org/wiki/%%'
             WHERE 
-                /* No existing WikiData relationship for this entity */
+                /* No existing Wikidata relationship for this entity */
                 NOT EXISTS (SELECT 1 FROM """ + url_relationship_table + """ ol WHERE ol.""" + main_entity_entity_point + """ = e.id AND ol.link IN (SELECT id FROM link WHERE link_type = """ + str(WIKIDATA_RELATIONSHIP_TYPES[ENTITY_TYPE]) + """))
                 /* WP link should only be linked to this entity */
                 AND NOT EXISTS (SELECT 1 FROM """ + url_relationship_table + """ ol WHERE ol.""" + url_entity_point + """ = u.id AND ol.""" + main_entity_entity_point + """ <> e.id)
@@ -80,7 +80,7 @@ def main(ENTITY_TYPE):
         if page.wikidata_id:
             wikidata_url = 'http://www.wikidata.org/wiki/%s' % page.wikidata_id.upper()
             edit_note = 'From %s' % (entity['wp_url'],)
-            colored_out(bcolors.OKGREEN, ' * found WikiData identifier:', wikidata_url)
+            colored_out(bcolors.OKGREEN, ' * found Wikidata identifier:', wikidata_url)
             time.sleep(1)
             out(' * edit note:', edit_note.replace('\n', ' '))
             mb.add_url(ENTITY_TYPE.replace('-', '_'), entity['gid'], str(WIKIDATA_RELATIONSHIP_TYPES[ENTITY_TYPE]), wikidata_url, edit_note, True)
