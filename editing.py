@@ -147,7 +147,7 @@ class MusicBrainzClient(object):
 
     def _as_auto_editor(self, prefix, auto):
         try:
-            self.b[prefix + "as_auto_editor"] = ["1"] if auto else []
+            self.b[prefix + "make_votable"] = [] if auto else ["1"]
         except mechanize.ControlNotFoundError:
             pass
 
@@ -176,7 +176,7 @@ class MusicBrainzClient(object):
         dta = {prefix + "rels.0.action": action,
              prefix + "rels.0.link_type": link_type,
              prefix + "edit_note": edit_note.encode('utf-8'),
-             prefix + "as_auto_editor": auto and 1 or 0}
+             prefix + "make_votable": not auto and 1 or 0}
         if rel_id:
             dta[prefix + "rels.0.id"] = rel_id
         entities = sorted([entity0, entity1], key=lambda entity: entity['type'])
@@ -559,7 +559,7 @@ class MusicBrainzClient(object):
         self._select_form("add-cover-art")
         self.b.set_all_readonly(False)
         try:
-            self.b['add-cover-art.as_auto_editor'] = 1 if auto else 0
+            self._as_auto_editor('add-cover-art', auto)
         except mechanize._form.ControlNotFoundError:
             pass
         submitted_types = []
