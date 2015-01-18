@@ -22,7 +22,7 @@ query = """
         JOIN link_attribute la ON la.link = l.id
         JOIN link_attribute_type lat ON la.attribute_type = lat.id AND lat.name = 'live'
         JOIN work w ON lrw.entity1 = w.id
-    WHERE r.comment ~ E'live, \\\\d{4}(-\\\\d{2})?(-\\\\d{2})?:'
+    WHERE r.comment ~ E'live, \\\\d{4}(-\\\\d{2})?(-\\\\d{2})?:?'
         AND l.begin_date_year IS NULL
         AND l.end_date_year IS NULL
         AND lt.name = 'performance'
