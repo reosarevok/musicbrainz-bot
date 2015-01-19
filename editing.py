@@ -11,10 +11,23 @@ import config as cfg
 import hashlib
 import base64
 import imghdr
-from utils import structureToString
+from utils import structureToString, colored_out
 from datetime import datetime
 from mbbot.guesscase import guess_artist_sort_name
 
+# Optional modules
+try:
+    from selenium import webdriver
+    from selenium.webdriver.common.keys import Keys
+except ImportError as err:
+    colored_out(bcolors.WARNING, "Warning: Cannot use Selenium Webdriver client: %s" % err)
+    webdriver = None
+
+try:
+    from pyvirtualdisplay import Display
+except ImportError as err:
+    colored_out(bcolors.WARNING, "Warning: Cannot run Selenium Webdriver client in headless mode: %s" % err)
+    Display = None
 
 def test_plain_jpeg(h, f):
     """Without this, imghdr only recognizes images with JFIF/Exif header. http://bugs.python.org/issue16512"""
@@ -582,3 +595,38 @@ class MusicBrainzClient(object):
 
         if image_is_remote:
             os.remove(localFile)
+
+class MusicBrainzWebdriverClient(object):
+
+    def __init__(self, username, password, server="http://musicbrainz.org", editor_id=None, headless=True):
+        if headless and Display is not None:
+            self.display = Display(visible=0, size=(800, 600))
+            self.display.start()
+        if webdriver is None:
+            raise Exception('Selenium webdriver is not installed')
+        self.server = server
+        self.username = username
+        self.editor_id = editor_id
+        self.driver = webdriver.Firefox()
+        self.login(username, password)
+
+    def __del__(self):
+        self.driver.quit()
+        if self.display:
+            self.display.popen.terminate()
+
+
+    def url(self, path, **kwargs):
+        query = ''
+        if kwargs:
+            query = '?' + urllib.urlencode([(k, v.encode('utf8')) for (k, v) in kwargs.items()])
+        return self.server + path + query
+
+    def login(self, username, password):
+        self.driver.get(self.url("/login"))
+        self.driver.find_element_by_name("username").send_keys(username)
+        passwordField = self.driver.find_element_by_name("password")
+        passwordField.send_keys(password)
+        passwordField.submit()
+        if self.driver.current_url != self.url("/user/" + username):
+            raise Exception('unable to login')
