@@ -10,7 +10,7 @@ import tempfile
 from PIL import Image
 from cStringIO import StringIO
 import time
-from editing import MusicBrainzClient
+from editing import MusicBrainzWebdriverClient
 import socket
 from utils import out, colored_out, bcolors, monkeypatch_mechanize
 import config as cfg
@@ -55,7 +55,7 @@ db = engine.connect()
 db.execute("SET search_path TO musicbrainz, %s, public" % cfg.BOT_SCHEMA_DB)
 
 monkeypatch_mechanize()
-mb = MusicBrainzClient(cfg_caa.MB_USERNAME, cfg_caa.MB_PASSWORD, cfg_caa.MB_SITE)
+mb = MusicBrainzWebdriverClient(cfg_caa.MB_USERNAME, cfg_caa.MB_PASSWORD, cfg_caa.MB_SITE)
 
 discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
 
@@ -166,15 +166,15 @@ LIMIT 100
 
 def amz_get_info(url):
     params = {'ResponseGroup': 'Images'}
-    
+
     m = re.match(r'^https?://(?:www.)?amazon\.(.*?)(?:\:[0-9]+)?/.*/([0-9B][0-9A-Z]{9})(?:[^0-9A-Z]|$)', url)
     if m is None:
         return (None, None)
-        
+
     locale = m.group(1).replace('co.', '').replace('com', 'us')
     asin = m.group(2)
     amazon_api = RetryAPI(cfg.AWS_KEY, cfg.AWS_SECRET_KEY, locale, cfg.AWS_ASSOCIATE_TAG)
-    
+
     try:
         root = amazon_api.item_lookup(asin, **params)
     except amazonproduct.errors.InvalidParameterValue, e:
@@ -206,7 +206,7 @@ def discogs_get_primary_image(url):
             # No primary image found => return first images
             return release.images[0]
     return None
-    
+
 
 def discogs_get_secondary_images(url):
     if url is None:

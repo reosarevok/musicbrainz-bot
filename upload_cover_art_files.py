@@ -6,14 +6,14 @@ import re
 import time
 import urllib2
 import json
-from editing import MusicBrainzClient
+from editing import MusicBrainzWebdriverClient
 from utils import out, colored_out, bcolors, monkeypatch_mechanize
 import config as cfg
 
 # Work around mechanize bug. See: https://github.com/jjlee/mechanize/pull/58
 monkeypatch_mechanize()
 
-mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
+mb = MusicBrainzWebdriverClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
 FILE_RE = re.compile(r'^(?P<mbid>[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})-(?P<type>front|back|medium|booklet|tray|sticker)(?:-\d+)?\.(?:jpeg|jpg|png|gif)', re.I)
 

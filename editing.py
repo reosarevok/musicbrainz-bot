@@ -19,6 +19,9 @@ from mbbot.guesscase import guess_artist_sort_name
 try:
     from selenium import webdriver
     from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
 except ImportError as err:
     colored_out(bcolors.WARNING, "Warning: Cannot use Selenium Webdriver client: %s" % err)
     webdriver = None
@@ -612,7 +615,7 @@ class MusicBrainzWebdriverClient(object):
 
     def __del__(self):
         self.driver.quit()
-        if self.display:
+        if hasattr(self, 'display') and self.display is not None:
             self.display.popen.terminate()
 
 
@@ -630,3 +633,46 @@ class MusicBrainzWebdriverClient(object):
         passwordField.submit()
         if self.driver.current_url != self.url("/user/" + username):
             raise Exception('unable to login')
+
+    def _as_auto_editor(self, prefix, auto):
+        if not auto:
+            self.driver.find_element_by_name(prefix + ".make_votable").click()
+
+    def add_cover_art(self, release_gid, image, types=[], position=None, comment=u'', edit_note=u'', auto=False):
+
+        # Download image if it is remote
+        image_is_remote = True if image.startswith(('http://', 'https://', 'ftp://')) else False
+        if image_is_remote:
+            u = urllib2.urlopen(image)
+            f, ext = os.path.splitext(image)
+            localFile = '%s/%s%s' % (cfg.TMP_DIR, ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8)), ext)
+            tmpfile = open(localFile, 'w')
+            tmpfile.write(u.read())
+            tmpfile.close()
+        else:
+            localFile = os.path.abspath(image)
+
+        self.driver.get(self.url("/release/%s/add-cover-art" % (release_gid,)))
+        # Select image
+        self.driver.execute_script("$('input[type=file]').css('left', 0);") # Selenium needs the file selector to be visible
+        self.driver.find_element_by_xpath("//input[@type='file']").send_keys(localFile)
+        # Set types
+        typeLabels = self.driver.find_elements_by_xpath("//div[@class='cover-art-types row']//ul//label")
+        for type in types:
+            for label in typeLabels:
+                if label.find_element_by_tag_name('span').text.lower() == type.lower():
+                    label.click()
+                    break
+        # Set comment
+        self.driver.find_element_by_xpath("//input[@class='comment']").send_keys(comment.encode('utf8'))
+        # Set edit note
+        self.driver.find_element_by_xpath("//textarea[@class='edit-note']").send_keys(edit_note.encode('utf8'))
+        # Auto-edit
+        self._as_auto_editor('add-cover-art', auto)
+        # Submit
+        self.driver.find_element_by_id("add-cover-art-submit").click()
+        wait = WebDriverWait(self.driver, 60)
+        wait.until(EC.title_contains('- Cover Art -'))
+        # Remove downloaded file
+        if image_is_remote:
+            os.remove(localFile)
