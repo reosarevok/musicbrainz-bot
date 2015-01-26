@@ -3,7 +3,7 @@
 import re
 import sqlalchemy
 import solr
-from editing import MusicBrainzClient
+from editing import MusicBrainzWebdriverClient
 import discogs_client
 import pprint
 import urllib
@@ -15,7 +15,7 @@ engine = sqlalchemy.create_engine(cfg.MB_DB)
 db = engine.connect()
 db.execute("SET search_path TO musicbrainz, %s" % cfg.BOT_SCHEMA_DB)
 
-mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
+mb = MusicBrainzWebdriverClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
 discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
 
@@ -88,7 +88,7 @@ DISCOGS_MB_FORMATS_MAPPING = {
 }
 
 for medium in db.execute(query):
-    colored_out(bcolors.OKBLUE, 'Looking up medium #%s of release "%s" by "%s" http://musicbrainz.org/release/%s' % (medium['position'], medium['name'], medium['ac_name'], medium['gid']))
+    colored_out(bcolors.OKBLUE, 'Looking up medium #%s of release "%s" by "%s" http://musicbrainz.org/release/%s' % (medium['medium_id'], medium['name'], medium['ac_name'], medium['gid']))
 
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', medium['discogs_url'])
     if m:
@@ -99,7 +99,7 @@ for medium in db.execute(query):
         colored_out(bcolors.HEADER, ' * using %s, found format: %s' % (medium['discogs_url'], discogs_format))
         edit_note = 'Setting medium format from attached Discogs link (%s)' % medium['discogs_url']
         out(' * edit note: %s' % (edit_note,))
-        mb.set_release_medium_format(medium['gid'], medium['position'], medium['format'], DISCOGS_MB_FORMATS_MAPPING[discogs_format], edit_note, True)
+        mb.set_release_medium_format(medium['gid'], medium['medium_id'], DISCOGS_MB_FORMATS_MAPPING[discogs_format], edit_note, True)
     else:
         colored_out(bcolors.FAIL, ' * using %s, no matching format has been found' % (medium['discogs_url'],))
 

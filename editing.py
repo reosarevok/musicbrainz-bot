@@ -22,6 +22,7 @@ try:
     from selenium.webdriver.support import expected_conditions as EC
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.common.exceptions import NoSuchElementException, ElementNotVisibleException
 except ImportError as err:
     colored_out(bcolors.WARNING, "Warning: Cannot use Selenium Webdriver client: %s" % err)
     webdriver = None
@@ -618,7 +619,6 @@ class MusicBrainzWebdriverClient(object):
         if hasattr(self, 'display') and self.display is not None:
             self.display.popen.terminate()
 
-
     def url(self, path, **kwargs):
         query = ''
         if kwargs:
@@ -638,8 +638,32 @@ class MusicBrainzWebdriverClient(object):
         if not auto:
             self.driver.find_element_by_name(prefix + ".make_votable").click()
 
-    def add_cover_art(self, release_gid, image, types=[], position=None, comment=u'', edit_note=u'', auto=False):
+    def _enter_edit_note(self, edit_note):
+        textarea = None
+        try:
+            textarea = self.driver.find_element_by_xpath("//textarea[@class='edit-note']")
+        except NoSuchElementException:
+            try:
+                textarea = self.driver.find_element_by_id('edit-note-text')
+            except NoSuchElementException:
+                pass
+        if textarea is not None:
+            textarea.send_keys(edit_note.encode('utf8'))
+        else:
+            print " * No textarea found for edit note!"
 
+    def _submit_and_wait(self, submitButton):
+        submitButton.click()
+        wait = WebDriverWait(self.driver, 60)
+        wait.until(EC.staleness_of(submitButton))
+
+    def _exist_errors_in_release_editor(self):
+        tabs = self.driver.find_elements_by_xpath("//ul[@role='tablist']//li")
+        for tab in tabs:
+            if 'error-tab' in tab.get_attribute('class'):
+                return True
+
+    def add_cover_art(self, release_gid, image, types=[], position=None, comment=u'', edit_note=u'', auto=False):
         # Download image if it is remote
         image_is_remote = True if image.startswith(('http://', 'https://', 'ftp://')) else False
         if image_is_remote:
@@ -666,13 +690,53 @@ class MusicBrainzWebdriverClient(object):
         # Set comment
         self.driver.find_element_by_xpath("//input[@class='comment']").send_keys(comment.encode('utf8'))
         # Set edit note
-        self.driver.find_element_by_xpath("//textarea[@class='edit-note']").send_keys(edit_note.encode('utf8'))
+        self._enter_edit_note(edit_note)
         # Auto-edit
         self._as_auto_editor('add-cover-art', auto)
         # Submit
-        self.driver.find_element_by_id("add-cover-art-submit").click()
-        wait = WebDriverWait(self.driver, 60)
-        wait.until(EC.title_contains('- Cover Art -'))
+        submitButton = self.driver.find_element_by_id("add-cover-art-submit")
+        self._submit_and_wait(submitButton)
         # Remove downloaded file
         if image_is_remote:
             os.remove(localFile)
+
+    def set_release_medium_format(self, entity_id, medium_id, new_format_id, edit_note, auto=False):
+        self.driver.get(self.url("/release/%s/edit" % (entity_id,)))
+        wait = WebDriverWait(self.driver, 60)
+        # Disable confirmation when exiting this page
+        self.driver.execute_script("window.onbeforeunload = function(e){};")
+        # Confirm barcode, if required
+        wait.until(EC.presence_of_element_located((By.ID, "barcode")))
+        try:
+            self.driver.find_element_by_id("barcode").click()
+            self.driver.find_element_by_xpath("//input[contains(@data-bind, 'confirmed')]").click()
+        except (NoSuchElementException, ElementNotVisibleException) as e:
+            pass
+        # Check that there are no preexisting errors that would prevent submitting the changes
+        if self._exist_errors_in_release_editor():
+            print " * can't edit this release, it has preexisting errors"
+            return
+        # Open Tracklist tab
+        self.driver.find_element_by_xpath("//a[@href='#tracklist']").click()
+        # Set format
+        xpath = "//select[@id='disc-format-%s']//option[@value='%s']" % (medium_id, new_format_id)
+        wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+        self.driver.find_element_by_xpath(xpath).click()
+        # Check that setting new format doesn't generate error (e.g. setting format to Vinyl if discid is present)
+        errorTDs = self.driver.find_elements_by_xpath("//tr[@class='error']//td[contains(@data-bind, 'hasInvalidFormat')]")
+        for errorTD in errorTDs:
+            if errorTD.is_displayed():
+                print " * has a discid => medium format can't be set to a format that can't have disc IDs"
+                return
+        # Open Edit Note tab
+        self.driver.find_element_by_xpath("//a[@href='#edit-note']").click()
+        # Set edit note
+        self._enter_edit_note(edit_note)
+        # Auto-edit
+        if not auto:
+            self.driver.find_element_by_xpath("//input[@data-bind='checked: makeVotable']").click()
+        # Submit
+        xpath = "//button[@data-click='submitEdits']"
+        wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+        submitButton = self.driver.find_element_by_xpath(xpath)
+        self._submit_and_wait(submitButton)
