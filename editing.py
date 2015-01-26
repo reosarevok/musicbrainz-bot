@@ -613,6 +613,7 @@ class MusicBrainzWebdriverClient(object):
         self.editor_id = editor_id
         self.driver = webdriver.Firefox()
         self.login(username, password)
+        self.wait = WebDriverWait(self.driver, 60)
 
     def __del__(self):
         self.driver.quit()
@@ -654,8 +655,7 @@ class MusicBrainzWebdriverClient(object):
 
     def _submit_and_wait(self, submitButton):
         submitButton.click()
-        wait = WebDriverWait(self.driver, 60)
-        wait.until(EC.staleness_of(submitButton))
+        self.wait.until(EC.staleness_of(submitButton))
 
     def _exist_errors_in_release_editor(self):
         tabs = self.driver.find_elements_by_xpath("//ul[@role='tablist']//li")
@@ -700,13 +700,11 @@ class MusicBrainzWebdriverClient(object):
         if image_is_remote:
             os.remove(localFile)
 
-    def set_release_medium_format(self, entity_id, medium_id, new_format_id, edit_note, auto=False):
-        self.driver.get(self.url("/release/%s/edit" % (entity_id,)))
-        wait = WebDriverWait(self.driver, 60)
+    def _release_editor_prerequisites_are_satisfied(self):
         # Disable confirmation when exiting this page
         self.driver.execute_script("window.onbeforeunload = function(e){};")
         # Confirm barcode, if required
-        wait.until(EC.presence_of_element_located((By.ID, "barcode")))
+        self.wait.until(EC.presence_of_element_located((By.ID, "barcode")))
         try:
             self.driver.find_element_by_id("barcode").click()
             self.driver.find_element_by_xpath("//input[contains(@data-bind, 'confirmed')]").click()
@@ -715,12 +713,18 @@ class MusicBrainzWebdriverClient(object):
         # Check that there are no preexisting errors that would prevent submitting the changes
         if self._exist_errors_in_release_editor():
             print " * can't edit this release, it has preexisting errors"
+            return False
+        return True
+
+    def set_release_medium_format(self, entity_id, medium_id, new_format_id, edit_note, auto=False):
+        self.driver.get(self.url("/release/%s/edit" % (entity_id,)))
+        if not self._check_release_editor_prerequisites():
             return
         # Open Tracklist tab
         self.driver.find_element_by_xpath("//a[@href='#tracklist']").click()
         # Set format
         xpath = "//select[@id='disc-format-%s']//option[@value='%s']" % (medium_id, new_format_id)
-        wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+        self.wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
         self.driver.find_element_by_xpath(xpath).click()
         # Check that setting new format doesn't generate error (e.g. setting format to Vinyl if discid is present)
         errorTDs = self.driver.find_elements_by_xpath("//tr[@class='error']//td[contains(@data-bind, 'hasInvalidFormat')]")
@@ -737,6 +741,50 @@ class MusicBrainzWebdriverClient(object):
             self.driver.find_element_by_xpath("//input[@data-bind='checked: makeVotable']").click()
         # Submit
         xpath = "//button[@data-click='submitEdits']"
-        wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
+        submitButton = self.driver.find_element_by_xpath(xpath)
+        self._submit_and_wait(submitButton)
+
+    def edit_release_tracklisting(self, entity_id, mediums, edit_note=u'', auto=False):
+        """
+        Edit a release tracklisting. Doesn't handle adding/deleting tracks. Track ids are mandatory.
+        Each medium object may contain the following properties: tracklist. (position, format, name could be added later if needed)
+        Each track object may contain the following properties: length, number.
+        """
+        self.driver.get(self.url("/release/%s/edit" % (entity_id,)))
+        self.wait = WebDriverWait(self.driver, 60)
+        if not self._release_editor_prerequisites_are_satisfied():
+            return
+        # Open Tracklist tab
+        self.driver.find_element_by_xpath("//a[@href='#tracklist']").click()
+        for medium_no, medium in enumerate(mediums):
+            if 'tracklist' in medium:
+                # Load medium if required
+                disc_button = self.driver.find_element_by_xpath("((//fieldset[@class='advanced-disc'])[%s]//td[@class='icon'])[1]//button" % (medium_no+1))
+                if 'expand' in disc_button.get_attribute('class'):
+                    disc_button.click()
+                for track in medium['tracklist']:
+                    if 'id' not in track:
+                        print " * track id is required"
+                        return
+                    self.wait.until(EC.presence_of_element_located((By.ID, "track-row-%s" % track['id'])))
+                    if 'number' in track:
+                        input = self.driver.find_element_by_xpath("//tr[@id='track-row-%s']//td[@class='position']//input" % track['id'])
+                        input.clear()
+                        input.send_keys(track['number'])
+                    if 'length' in track:
+                        input = self.driver.find_element_by_xpath("//tr[@id='track-row-%s']//td[@class='length']//input" % track['id'])
+                        input.clear()
+                        input.send_keys(track['length'])
+        # Open Edit Note tab
+        self.driver.find_element_by_xpath("//a[@href='#edit-note']").click()
+        # Set edit note
+        self._enter_edit_note(edit_note)
+        # Auto-edit
+        if not auto:
+            self.driver.find_element_by_xpath("//input[@data-bind='checked: makeVotable']").click()
+        # Submit
+        xpath = "//button[@data-click='submitEdits']"
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
         submitButton = self.driver.find_element_by_xpath(xpath)
         self._submit_and_wait(submitButton)

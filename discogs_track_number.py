@@ -2,7 +2,7 @@
 
 import re
 import sqlalchemy
-from editing import MusicBrainzClient
+from editing import MusicBrainzWebdriverClient
 import discogs_client
 import time
 import Levenshtein
@@ -13,7 +13,7 @@ engine = sqlalchemy.create_engine(cfg.MB_DB)
 db = engine.connect()
 db.execute("SET search_path TO musicbrainz, %s" % cfg.BOT_SCHEMA_DB)
 
-mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
+mb = MusicBrainzWebdriverClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
 discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
 
@@ -55,7 +55,7 @@ LIMIT 1000
 """
 
 query_release_tracks = """
-SELECT t.position, t.number, t.name, t.length, m.position AS medium_position
+SELECT t.id, t.position, t.number, t.name, t.length, m.position AS medium_position
 FROM track t
     JOIN medium m ON t.medium = m.id
 WHERE m.release = %s
@@ -75,7 +75,7 @@ def discogs_get_tracklist(release_url):
     if m:
         release_id = int(m.group(1))
         release = discogs.release(release_id)
-        return [track for track in release.tracklist if track['position'] != '']
+        return [track for track in release.tracklist if track.position != '']
     return None
 
 for release in db.execute(query):
@@ -89,35 +89,34 @@ for release in db.execute(query):
         new_mediums = []
         position = 0
         for mb_track in db.execute(query_release_tracks, (release['id'],)):
-            new_track = {}
+            new_track = {'id': mb_track['id']}
             if len(new_mediums) < mb_track['medium_position']:
                 new_mediums.append({'tracklist': []})
             new_mediums[-1]['tracklist'].append(new_track)
 
             discogs_track = discogs_tracks[position]
-            if not are_similar(discogs_track['title'], mb_track['name']):
-                colored_out(bcolors.FAIL, ' * track #%s not similar enough' % discogs_track['position'])
+            if not are_similar(discogs_track.title, mb_track['name']):
+                colored_out(bcolors.FAIL, ' * track #%s not similar enough' % discogs_track.position)
                 changed = False
                 break
-            
-            if discogs_track['position'] != mb_track['number'] \
-                and re.match(r'^[A-Z]+[\.-]?\d*', discogs_track['position']) \
+
+            if discogs_track.position != mb_track['number'] \
+                and re.match(r'^([A-Z]+|[A-Z][\.-]?\d*)$', discogs_track.position) \
                 and re.match(r'^\d+$', mb_track['number']):
-                new_track['number'] = discogs_track['position']
+                new_track['number'] = discogs_track.position
                 changed = True
-            
+
             # Also set length if it's not defined on MB
-            if discogs_track['duration'] != "" and mb_track['length'] is None:
-                new_track['length'] = durationToMS(discogs_track['duration'])
+            if discogs_track.duration != "" and mb_track['length'] is None:
+                new_track['length'] = discogs_track.duration
                 changed = True
             position += 1
-                    
+
         if not changed:
             colored_out(bcolors.HEADER, ' * no changes found from %s' % release['discogs_url'])
         else:
             edit_note = 'Tracks number and/or length from attached Discogs link (%s)' % release['discogs_url']
             out(' * edit note: %s' % (edit_note,))
-            time.sleep(5)
             mb.edit_release_tracklisting(release['gid'], new_mediums, edit_note, False)
 
     if release['processed'] is None:
