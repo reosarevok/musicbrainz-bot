@@ -718,7 +718,7 @@ class MusicBrainzWebdriverClient(object):
 
     def set_release_medium_format(self, entity_id, medium_id, new_format_id, edit_note, auto=False):
         self.driver.get(self.url("/release/%s/edit" % (entity_id,)))
-        if not self._check_release_editor_prerequisites():
+        if not self._release_editor_prerequisites_are_satisfied():
             return
         # Open Tracklist tab
         self.driver.find_element_by_xpath("//a[@href='#tracklist']").click()
