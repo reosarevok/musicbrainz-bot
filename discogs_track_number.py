@@ -33,7 +33,7 @@ WITH
             JOIN medium m ON m.release = r.id
             JOIN l_release_url l ON l.entity0 = r.id AND l.link IN (SELECT id FROM link WHERE link_type = 76)
             JOIN url u ON u.id = l.entity1
-        WHERE m.format IN (7,8,29,30,41)
+        WHERE m.format IN (7,8,29,30,31)
             /* Discogs link should only be linked to this release */
             AND NOT EXISTS (SELECT 1 FROM l_release_url WHERE l_release_url.entity1 = u.id AND l_release_url.entity0 <> r.id)
             /* this release should not have another Discogs link attached */
@@ -42,6 +42,7 @@ WITH
             AND EXISTS (SELECT 1 FROM track t WHERE t.medium = m.id AND t.number ~ '^\d+$')
             AND l.edits_pending = 0
             AND r.edits_pending = 0
+            AND m.edits_pending = 0
     )
 SELECT r.id, r.gid, r.name, ra.discogs_url, ac.name AS ac_name, b.processed, SUM(m.track_count) AS track_count
 FROM vinyl_releases ra
