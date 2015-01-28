@@ -67,9 +67,10 @@ def are_similar(name1, name2):
     name1, name2 = (mangle_name(s) for s in (name1, name2))
     ratio = Levenshtein.jaro_winkler(name1, name2)
     # TODO: remove this debug print
-    if ratio < 0.8:
+    threshold = 0.75
+    if ratio < threshold:
         print " * ratio = %s => name1 = '%s' vs name2 = '%s'" % (ratio, name1, name2)
-    return ratio >= 0.8
+    return ratio >= threshold
 
 def discogs_get_tracklist(release_url):
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', release_url)
