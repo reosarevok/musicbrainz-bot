@@ -54,27 +54,34 @@ LIMIT 1000
 
 
 def discogs_get_medium_format(release, medium_no):
-    if release.formats is not None and len(release.formats) > 1:
+    if release.formats is None:
         return None
+    consolidated_formats = set()
     for format in release.formats:
         if format['name'] == 'CD':
-            return 'CD'
+            consolidated_formats.add('CD')
         elif format['name'] == 'CDr':
-            return 'CDr'
+            consolidated_formats.add('CDr')
         elif format['name'] == 'Cassette':
-            return 'Cassette'
+            consolidated_formats.add('Cassette')
         elif format['name'] == 'File':
-            return 'DigitalMedia'
+            consolidated_formats.add('DigitalMedia')
         elif format['name'] in ('Vinyl', 'Shellac'):
             if 'descriptions' not in format:
-                return "Vinyl"
+                consolidated_formats.add('Vinyl')
             elif '12"' in format['descriptions'] or 'LP' in format['descriptions']:
-                return '12"'
+                consolidated_formats.add('12"')
             elif '7"' in format['descriptions']:
-                return '7"'
+                consolidated_formats.add('7"')
             elif '10"' in format['descriptions']:
-                return '10"'
-    return None
+                consolidated_formats.add('10"')
+            else:
+                consolidated_formats.add('Vinyl')
+        elif format['name'] not in ['Box Set', 'All Media']:
+            consolidated_formats.add(format['name'])
+    if len(consolidated_formats) != 1:
+        return None
+    return consolidated_formats.pop()
 
 DISCOGS_MB_FORMATS_MAPPING = {
     'Vinyl': 7,
