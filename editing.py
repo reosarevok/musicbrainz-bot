@@ -104,7 +104,7 @@ class MusicBrainzClient(object):
         self.b["password"] = password
         self.b.submit()
         resp = self.b.response()
-        if resp.geturl() != self.url("/user/" + username):
+        if resp.geturl() != self.url("/user/" + urllib.quote(username)):
             raise Exception('unable to login')
 
     # return number of edits that left for today
@@ -632,7 +632,7 @@ class MusicBrainzWebdriverClient(object):
         passwordField = self.driver.find_element_by_name("password")
         passwordField.send_keys(password)
         passwordField.submit()
-        if self.driver.current_url != self.url("/user/" + username):
+        if self.driver.current_url != self.url("/user/" + urllib.quote(username)):
             raise Exception('unable to login')
 
     def _as_auto_editor(self, prefix, auto):
