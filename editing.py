@@ -10,7 +10,6 @@ import json
 import tempfile
 import hashlib
 import base64
-import imghdr
 from utils import structureToString, colored_out
 from datetime import datetime
 from mbbot.guesscase import guess_artist_sort_name
@@ -32,14 +31,6 @@ try:
 except ImportError as err:
     colored_out(bcolors.WARNING, "Warning: Cannot run Selenium Webdriver client in headless mode: %s" % err)
     Display = None
-
-def test_plain_jpeg(h, f):
-    """Without this, imghdr only recognizes images with JFIF/Exif header. http://bugs.python.org/issue16512"""
-    if h.startswith('\xff\xd8'):
-        return 'jpeg'
-
-imghdr.tests.append(test_plain_jpeg)
-
 
 def format_time(secs):
     return '%0d:%02d' % (secs // 60, secs % 60)
@@ -376,64 +367,6 @@ class MusicBrainzClient(object):
             raise Exception('unable to post edit')
         return True
 
-    def edit_release_tracklisting(self, entity_id, mediums, edit_note=u'', auto=False):
-        """
-        Edit a release tracklisting. Doesn't handle adding/deleting tracks.
-        Each medium object may contain the following properties: position, format, name, tracklist.
-        Each track object may contain the following properties: position, name, length, number, artist_credit.
-        """
-        self.b.open(self.url("/release/%s/edit" % (entity_id,)))
-
-        self._select_form("/edit")
-        self.b["barcode_confirm"] = ["1"]
-        self.b.submit(name="step_tracklist")
-
-        self._select_form("/edit")
-        for medium_no, medium in enumerate(mediums):
-            if 'position' in medium:
-                self.b["mediums.%s.position" % medium_no] = medium['position']
-            if 'name' in medium:
-                self.b["mediums.%s.name" % medium_no] = medium['name']
-            if 'format_id' in medium:
-                self.b["mediums.%s.format_id" % medium_no] = medium['format_id']
-
-            if 'tracklist' in medium:
-                tracklist_id = self.b["mediums.%s.id" % medium_no]
-                request = urllib2.Request('http://musicbrainz.org/ws/js/medium/%s' % tracklist_id, headers={"Accept": "application/json"})
-                data = urllib2.urlopen(request)
-                old_tracklist = json.load(data)
-
-                edited_tracklist = []
-                for trackno, old_track in enumerate(old_tracklist['tracks']):
-                    new_track = medium['tracklist'][trackno]  # if medium['tracklist'][trackno] is not None else {}
-                    name = new_track['name'] if 'name' in new_track else old_track['name']
-                    to = {
-                        'name': name,
-                        'length': new_track['length'] if 'length' in new_track else old_track['length'],
-                        'artist_credit': new_track['artist_credit'] if 'artist_credit' in new_track else old_track['artist_credit']
-                    }
-                    to['edit_sha1'] = base64.b64encode(hashlib.sha1(structureToString(to)).digest())
-                    to['position'] = trackno
-                    to['deleted'] = 0
-                    to['number'] = new_track['number'] if 'number' in new_track else old_track['number']
-
-                    edited_tracklist.append(to)
-
-                self.b["mediums.%s.edits" % medium_no] = json.dumps(edited_tracklist)
-
-        self.b.submit(name="step_editnote")
-        page = self.b.response().read()
-        self._select_form("/edit")
-        try:
-            self.b["edit_note"] = edit_note.encode('utf8')
-        except mechanize.ControlNotFoundError:
-            raise Exception('unable to post edit')
-        self._as_auto_editor("", auto)
-        self.b.submit(name="save")
-        page = self.b.response().read()
-        if "Release information" not in page:
-            raise Exception('unable to post edit')
-
     def set_release_script(self, entity_id, old_script_id, new_script_id, edit_note, auto=False):
         return self._edit_release_information(entity_id, {"script_id": [[str(old_script_id)], [str(new_script_id)]]}, edit_note, auto)
 
@@ -443,46 +376,6 @@ class MusicBrainzClient(object):
     def set_release_packaging(self, entity_id, old_packaging_id, new_packaging_id, edit_note, auto=False):
         old_packaging = [str(old_packaging_id)] if old_packaging_id is not None else None
         return self._edit_release_information(entity_id, {"packaging_id": [old_packaging, [str(new_packaging_id)]]}, edit_note, auto)
-
-    def set_release_medium_format(self, entity_id, medium_number, old_format_id, new_format_id, edit_note, auto=False):
-        self.b.open(self.url("/release/%s/edit" % (entity_id,)))
-
-        self._select_form("/edit")
-        self.b["barcode_confirm"] = ["1"]
-        self.b.submit(name="step_tracklist")
-
-        self._select_form("/edit")
-        attributes = {
-            "mediums.%s.format_id" % (medium_number - 1): [[str(old_format_id) if old_format_id is not None else ''], [str(new_format_id)]]
-        }
-        changed = False
-        for k, v in attributes.items():
-            if self.b[k] != v[0]:
-                print " * %s has changed, aborting" % k
-                return
-            if self.b[k] != v[1]:
-                changed = True
-                self.b[k] = v[1]
-        if not changed:
-            print " * already set, not changing"
-            return
-        self.b.submit(name="step_editnote")
-
-        page = self.b.response().read()
-        if "This medium already has disc ID" in page:
-            print " * has a discid => medium format can't be set to a format that can't have disc IDs"
-            return
-
-        self._select_form("/edit")
-        try:
-            self.b["edit_note"] = edit_note.encode('utf8')
-        except mechanize.ControlNotFoundError:
-            raise Exception('unable to post edit')
-        self._as_auto_editor("", auto)
-        self.b.submit(name="save")
-        page = self.b.response().read()
-        if "Release information" not in page:
-            raise Exception('unable to post edit')
 
     def add_edit_note(self, identify, edit_note):
         '''Adds an edit note to the last (or very recently) made edit. This
@@ -509,95 +402,6 @@ class MusicBrainzClient(object):
         if edit_note:
             self.b['confirm.edit_note'] = edit_note.encode('utf8')
         self.b.submit()
-
-    def add_cover_art(self, release_gid, image, types=[], position=None, comment=u'', edit_note=u'', auto=False):
-
-        # Download image if it's remotely hosted
-        image_is_remote = True if image.startswith(('http://', 'https://', 'ftp://')) else False
-        if image_is_remote:
-            u = urllib2.urlopen(image)
-            tmpfile = tempfile.NamedTemporaryFile(delete=False)
-            tmpfile.write(u.read())
-            tmpfile.close()
-            localFile = tmpfile.name
-        else:
-            localFile = image
-
-        # Determine mime type
-        fmt = imghdr.what(localFile)
-        if fmt in ("jpeg", "png", "gif"):
-            mime_type = "image/" + fmt
-        elif fmt is None:
-            raise Exception('Cannot recognize image type: %s' % localFile)
-        else:
-            raise Exception('Unsupported image type %s: %s' % (fmt, localFile))
-
-        self.b.open(self.url("/release/%s/add-cover-art" % (release_gid,)))
-        page = self.b.response().read()
-
-        # Generate a new cover art id, as done by mbserver
-        cover_art_id = int((time.time() - 1327528905) * 100)
-
-        # Step 1: Request POST fields for CAA from http://musicbrainz.org/ws/js/cover-art-upload
-        request = urllib2.Request('http://musicbrainz.org/ws/js/cover-art-upload/%s?image_id=%s&mime_type=%s&redirect=true' % (release_gid, cover_art_id, mime_type), headers={"Accept": "application/json"})
-        data = urllib2.urlopen(request)
-        postfields = json.load(data)['formdata']
-
-        # Step 2: Upload cover art to CAA
-        self.b.follow_link(tag="iframe")
-        TRIES = 4
-        DELAY = 3
-        attempts = 0
-        while True:
-            try:
-                self._select_form("archive.org")
-                self.b.add_file(open(localFile))
-                # Insert fields from ws/js, simulating what's done in javascript
-                for key, value in postfields.iteritems():
-                    self.b.new_control('hidden', key, {'value': str(value)})
-                self.b.fixup()
-                self.b.submit()
-                break
-            except (urllib2.HTTPError, urllib2.URLError):
-                if attempts < TRIES:
-                    attempts += 1
-                    self.b.back()
-                    continue
-                raise
-        page = self.b.response().read()
-        if "parent.document.getElementById" not in page:
-            raise Exception('Error uploading cover art file')
-
-        # Step 3: Submit the edit
-        self.b.back(2)
-        # Will probably fail. Solution is to install patched mechanize:
-        # http://stackoverflow.com/questions/9249996/mechanize-cannot-read-form-with-submitcontrol-that-is-disabled-and-has-no-value
-        self._select_form("add-cover-art")
-        self.b.set_all_readonly(False)
-        try:
-            self._as_auto_editor('add-cover-art', auto)
-        except mechanize._form.ControlNotFoundError:
-            pass
-        submitted_types = []
-        types_control = self.b.find_control(name='add-cover-art.type_id')
-        for type in types:
-            for item in types_control.get_items():
-                if len(item.get_labels()) > 0 and item.get_labels()[0].text.lower() == type.lower():
-                    submitted_types.append(item.name)
-                    break
-        self.b['add-cover-art.type_id'] = submitted_types
-        if position:
-            self.b['add-cover-art.position'] = position
-        if comment:
-            self.b['add-cover-art.comment'] = comment.encode('utf8')
-        if edit_note:
-            self.b['add-cover-art.edit_note'] = edit_note.encode('utf8')
-        self.b['add-cover-art.mime_type'] = [mime_type]
-        self.b['add-cover-art.id'] = str(cover_art_id)
-        self.b.submit()
-
-        if image_is_remote:
-            os.remove(localFile)
 
 class MusicBrainzWebdriverClient(object):
 
