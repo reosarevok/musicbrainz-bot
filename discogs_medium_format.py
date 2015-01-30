@@ -102,13 +102,16 @@ for medium in db.execute(query):
         discogs_release = discogs.release(int(m.group(1)))
 
     discogs_format = discogs_get_medium_format(discogs_release, medium['position'])
-    if discogs_format:
+    if discogs_format is None:
+        colored_out(bcolors.FAIL, ' * using %s, no matching format has been found' % medium['discogs_url'])
+    elif discogs_format not in DISCOGS_MB_FORMATS_MAPPING:
+        colored_out(bcolors.FAIL, ' * using %s, found unknown format %s' % (medium['discogs_url'], discogs_format))
+    elif DISCOGS_MB_FORMATS_MAPPING[discogs_format] == medium['format']:
+        colored_out(bcolors.FAIL, ' * using %s, no better format found' % medium['discogs_url'])
+    else:
         colored_out(bcolors.HEADER, ' * using %s, found format: %s' % (medium['discogs_url'], discogs_format))
         edit_note = 'Setting medium format from attached Discogs link (%s)' % medium['discogs_url']
-        out(' * edit note: %s' % (edit_note,))
         mb.set_release_medium_format(medium['gid'], medium['medium_id'], DISCOGS_MB_FORMATS_MAPPING[discogs_format], edit_note, True)
-    else:
-        colored_out(bcolors.FAIL, ' * using %s, no matching format has been found' % (medium['discogs_url'],))
 
     if medium['processed'] is None:
         db.execute("INSERT INTO bot_discogs_medium_format (medium) VALUES (%s)", (medium['medium_id'],))
