@@ -66,7 +66,7 @@ def discogs_get_medium_format(release, medium_no):
             consolidated_formats.add('Cassette')
         elif format['name'] == 'File':
             consolidated_formats.add('DigitalMedia')
-        elif format['name'] in ('Vinyl', 'Shellac'):
+        elif format['name'] in ('Vinyl', 'Shellac', 'Flexi-disc'):
             if 'descriptions' not in format:
                 consolidated_formats.add('Vinyl')
             elif '12"' in format['descriptions'] or 'LP' in format['descriptions']:
