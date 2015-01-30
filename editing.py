@@ -7,7 +7,7 @@ import os
 import random
 import string
 import json
-import config as cfg
+import tempfile
 import hashlib
 import base64
 import imghdr
@@ -516,11 +516,10 @@ class MusicBrainzClient(object):
         image_is_remote = True if image.startswith(('http://', 'https://', 'ftp://')) else False
         if image_is_remote:
             u = urllib2.urlopen(image)
-            f, ext = os.path.splitext(image)
-            localFile = '%s/%s%s' % (cfg.TMP_DIR, ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8)), ext)
-            tmpfile = open(localFile, 'w')
+            tmpfile = tempfile.NamedTemporaryFile(delete=False)
             tmpfile.write(u.read())
             tmpfile.close()
+            localFile = tmpfile.name
         else:
             localFile = image
 
@@ -668,11 +667,10 @@ class MusicBrainzWebdriverClient(object):
         image_is_remote = True if image.startswith(('http://', 'https://', 'ftp://')) else False
         if image_is_remote:
             u = urllib2.urlopen(image)
-            f, ext = os.path.splitext(image)
-            localFile = '%s/%s%s' % (cfg.TMP_DIR, ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(8)), ext)
-            tmpfile = open(localFile, 'w')
+            tmpfile = tempfile.NamedTemporaryFile(delete=False)
             tmpfile.write(u.read())
             tmpfile.close()
+            localFile = tmpfile.name
         else:
             localFile = os.path.abspath(image)
 
