@@ -54,14 +54,9 @@ engine = sqlalchemy.create_engine(cfg.MB_DB)
 db = engine.connect()
 db.execute("SET search_path TO musicbrainz, %s, public" % cfg.BOT_SCHEMA_DB)
 
-monkeypatch_mechanize()
 mb = MusicBrainzWebdriverClient(cfg_caa.MB_USERNAME, cfg_caa.MB_PASSWORD, cfg_caa.MB_SITE)
 
-discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot')
-
-consumer = oauth2.Consumer(cfg.DISCOGS_OAUTH_CONSUMER_KEY, cfg.DISCOGS_OAUTH_CONSUMER_SECRET)
-token_obj = oauth2.Token(cfg.DISCOGS_OAUTH_TOKEN_KEY, cfg.DISCOGS_OAUTH_TOKEN_SECRET)
-discogs_oauth_client = oauth2.Client(consumer, token_obj)
+discogs = discogs_client.Client('MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot', cfg.DISCOGS_OAUTH_CONSUMER_KEY, cfg.DISCOGS_OAUTH_CONSUMER_SECRET, cfg.DISCOGS_OAUTH_TOKEN_KEY, cfg.DISCOGS_OAUTH_TOKEN_SECRET)
 
 socket.setdefaulttimeout(300)
 
@@ -244,11 +239,7 @@ def submit_cover_art(release, url, types):
         colored_out(bcolors.NONE, " * skipping already submitted image '%s'" % (url,))
     else:
         colored_out(bcolors.OKGREEN, " * Adding " + ",".join(types) + (" " if len(types) > 0 else "") + "cover art '%s'" % (url,))
-        if 'discogs' in url:
-            headers = {'user-agent': 'MusicBrainzBot/0.1 +https://github.com/murdos/musicbrainz-bot'}
-            resp, content = discogs_oauth_client.request(url, 'GET', headers=headers)
-        else:
-            content = urllib2.urlopen(url).read()
+        content = urllib2.urlopen(url).read()
         image_file = tempfile.NamedTemporaryFile(delete=False)
         image_file.write(content)
         image_file.close()
