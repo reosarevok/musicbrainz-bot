@@ -85,7 +85,7 @@ for release in db.execute(query):
 
     discogs_tracks = discogs_get_tracklist(release['discogs_url'])
     if (len(discogs_tracks) != release['track_count']):
-        colored_out(bcolors.HEADER, ' * number of tracks mismatches (Discogs: %s vs MB: %s)' % (len(discogs_tracks), release['track_count']))
+        colored_out(bcolors.FAIL, ' * number of tracks mismatches (Discogs: %s vs MB: %s)' % (len(discogs_tracks), release['track_count']))
     else:
         changed = False
         new_mediums = []
@@ -103,7 +103,7 @@ for release in db.execute(query):
                 break
 
             if discogs_track.position != mb_track['number'] \
-                and re.match(r'^([A-Z]+|[A-Z][\.-]?\d*)$', discogs_track.position) \
+                and re.match(r'^(AA\d?|[A-Z]+|[A-Z][\.-]?\d*)$', discogs_track.position) \
                 and re.match(r'^\d+$', mb_track['number']):
                 new_track['number'] = discogs_track.position
                 changed = True
@@ -119,7 +119,7 @@ for release in db.execute(query):
         else:
             edit_note = 'Tracks number and/or length from attached Discogs link (%s)' % release['discogs_url']
             out(' * edit note: %s' % (edit_note,))
-            mb.edit_release_tracklisting(release['gid'], new_mediums, edit_note, False)
+            mb.edit_release_tracklisting(release['gid'], new_mediums, edit_note, True)
 
     if release['processed'] is None:
         db.execute("INSERT INTO bot_discogs_track_number (gid) VALUES (%s)", (release['gid'],))
