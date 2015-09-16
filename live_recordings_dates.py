@@ -33,11 +33,12 @@ query = """
     LIMIT 750
 """
 
-date_re = re.compile(r'live, (\d{4})(?:-(\d{2}))?(?:-(\d{2}))?:', re.I)
+date_re = re.compile(r'live, (\d{4})(?!-\d{4})(?:-(\d{2}))?(?:-(\d{2}))?:?', re.I)
 for recording in db.execute(query):
 
     m = re.match(date_re, recording['comment'])
     if m is None:
+        colored_out(bcolors.WARNING, 'Skipping http://musicbrainz.org/recording/%s "%s (%s)": not matching regexp' % (recording['r_gid'], recording['name'], recording['comment']))
         continue
 
     date = {'year': int(m.group(1))}
@@ -46,13 +47,13 @@ for recording in db.execute(query):
         date['month'] = int(m.group(2))
     if m.group(3) is not None:
         date['day'] = int(m.group(3))
-  
+
     colored_out(bcolors.OKBLUE, 'Setting performance relationships dates of http://musicbrainz.org/recording/%s "%s (%s)"' % (recording['r_gid'], recording['name'], recording['comment']))
 
     attributes = {}
     edit_note = 'Setting relationship dates from recording comment: "%s"' % recording['comment']
     colored_out(bcolors.NONE, " * new date:", date)
-    
+
     entity0 = {'type': 'recording', 'gid': recording['r_gid']}
     entity1 = {'type': 'work', 'gid': recording['w_gid']}
 
