@@ -60,7 +60,7 @@ query_params.extend((wp_lang, wp_lang))
 
 query = """
 WITH
-    artists_wo_wikipedia AS (
+    artists_wo_wikidata AS (
         SELECT DISTINCT a.id, iso.code AS iso_code
         FROM artist a
         LEFT JOIN area ON area.id = a.area
@@ -70,11 +70,15 @@ WITH
             JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http://""" + wp_lang + """.wikipedia.org/wiki/%%'
             WHERE l.link IN (SELECT id FROM link WHERE link_type = 179)
         ) wpl ON wpl.id = a.id
-        WHERE a.id > 2 AND wpl.id IS NULL
+        LEFT JOIN (SELECT l.entity0 AS id
+            FROM l_artist_url l
+            WHERE l.link IN (SELECT id FROM link WHERE link_type = 352)
+        ) wdl ON wdl.id = a.id
+        WHERE a.id > 2 AND wdl.id IS NULL AND wpl.id IS NULL
             AND (iso.code IS NULL OR """ + in_country_clause + """)
     )
 SELECT a.id, a.gid, a.name, ta.iso_code, b.processed
-FROM artists_wo_wikipedia ta
+FROM artists_wo_wikidata ta
 JOIN artist a ON ta.id=a.id
 LEFT JOIN bot_wp_artist_link b ON a.gid = b.gid AND b.lang = %s
 LEFT JOIN bot_wp_artist_link_ignore i ON a.gid = i.gid AND i.lang = %s
