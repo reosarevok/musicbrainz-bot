@@ -168,14 +168,6 @@ def get_page_content(wp, title, wp_lang, use_cache=True):
     add_page_content_to_cache(title, content, wp_lang)
     return content
 
-
-def extract_page_title(url, wp_lang):
-    prefix = 'http://%s.wikipedia.org/wiki/' % wp_lang
-    if not url.startswith(prefix):
-        return None
-    return urllib.unquote(url[len(prefix):].encode('utf8')).decode('utf8')
-
-
 def wp_is_canonical_page(title, page_orig):
     page = mangle_name(page_orig)
     if 'redirect' in page:

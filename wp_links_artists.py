@@ -67,7 +67,7 @@ WITH
         LEFT JOIN iso_3166_1 iso ON iso.area = area.id
         LEFT JOIN (SELECT l.entity0 AS id
             FROM l_artist_url l
-            JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http://""" + wp_lang + """.wikipedia.org/wiki/%%'
+            JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http%%://""" + wp_lang + """.wikipedia.org/wiki/%%'
             WHERE l.link IN (SELECT id FROM link WHERE link_type = 179)
         ) wpl ON wpl.id = a.id
         LEFT JOIN (SELECT l.entity0 AS id

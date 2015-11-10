@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import re
+import urllib
 from simplemediawiki import MediaWiki
-from utils import mw_remove_markup, get_page_content, extract_page_title
+from utils import mw_remove_markup, get_page_content
 
 category_re = {}
 category_re['en'] = re.compile(r'\[\[Category:(.+?)(?:\|.*?)?\]\]')
@@ -78,16 +79,15 @@ class WikiPage(object):
             info[name] = value
         return info
 
-
     def extract_first_paragraph(self, page):
         page = mw_remove_markup(page)
         return page.strip().split('\n\n')[0]
 
     @classmethod
     def fetch(cls, url, use_cache=True):
-        m = re.match(r'^http://([a-z\-]+)\.wikipedia\.org', url)
+        m = re.match(r'^https?://([a-z\-]+)\.wikipedia\.org/wiki/(.*)$', url)
         page_lang = m.group(1).encode('utf8')
-        page_title = extract_page_title(url, page_lang)
+        page_title = urllib.unquote(m.group(2).encode('utf8')).decode('utf8')
         wp = MediaWiki('http://%s.wikipedia.org/w/api.php' % page_lang)
         resp = wp.call({'action': 'query', 'prop': 'pageprops|revisions', 'titles': page_title.encode('utf8'), 'rvprop': 'content'})
         page = resp['query']['pages'].values()[0]

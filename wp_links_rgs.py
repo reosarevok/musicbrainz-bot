@@ -9,7 +9,7 @@ from editing import MusicBrainzClient
 import pprint
 import urllib
 import time
-from utils import mangle_name, join_names, out, get_page_content, extract_page_title, colored_out, bcolors, escape_query, quote_page_title, wp_is_canonical_page
+from utils import mangle_name, join_names, out, get_page_content, colored_out, bcolors, escape_query, quote_page_title, wp_is_canonical_page
 import config as cfg
 
 engine = sqlalchemy.create_engine(cfg.MB_DB)
@@ -58,7 +58,7 @@ WITH
         FROM release_group rg
         LEFT JOIN (SELECT l.entity0 AS id
             FROM l_release_group_url l
-            JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http://""" + wp_lang + """.wikipedia.org/wiki/%%'
+            JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http%%://""" + wp_lang + """.wikipedia.org/wiki/%%'
             WHERE l.link IN (SELECT id FROM link WHERE link_type = 89)
         ) wpl ON wpl.id = rg.id
         LEFT JOIN (SELECT l.entity0 AS id
