@@ -62,6 +62,11 @@ WITH
             JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http://""" + wp_lang + """.wikipedia.org/wiki/%%'
             WHERE l.link IN (SELECT id FROM link WHERE link_type = 89)
         ) wpl ON wpl.id = rg.id
+        LEFT JOIN (SELECT l.entity0 AS id
+            FROM l_release_group_url l
+            JOIN url u ON l.entity1 = u.id
+            WHERE l.link IN (SELECT id FROM link WHERE link_type = 353)
+        ) wdl ON wdl.id = rg.id
         LEFT JOIN (SELECT acn.artist_credit
             FROM artist_credit_name acn
             JOIN artist a ON acn.artist = a.id
@@ -70,7 +75,7 @@ WITH
             WHERE """ + in_country_clause + """
             GROUP BY acn.artist_credit HAVING count(iso.code) = 1
         ) tc ON rg.artist_credit = tc.artist_credit
-        WHERE rg.artist_credit > 2 AND wpl.id IS NULL
+        WHERE rg.artist_credit > 2 AND wpl.id IS NULL AND wdl.ID IS NULL
             AND (rg.type IS NULL OR rg.type IN (SELECT id FROM release_group_primary_type WHERE name IN ('Album')))
             AND (tc.artist_credit IS NOT NULL """ + (' OR TRUE' if no_country_filter else '') + """)
             AND rg.edits_pending = 0
