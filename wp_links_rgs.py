@@ -9,7 +9,8 @@ from editing import MusicBrainzClient
 import pprint
 import urllib
 import time
-from utils import mangle_name, join_names, out, get_page_content, colored_out, bcolors, escape_query, quote_page_title, wp_is_canonical_page
+from mbbot.wp.wikipage import WikiPage
+from utils import mangle_name, join_names, out, colored_out, bcolors, escape_query, quote_page_title, wp_is_canonical_page
 import config as cfg
 
 engine = sqlalchemy.create_engine(cfg.MB_DB)
@@ -117,11 +118,11 @@ for rg_id, rg_gid, rg_name, ac_name, rg_sec_types, processed in db.execute(query
         if delay < 1.0:
             time.sleep(1.0 - delay)
         last_wp_request = time.time()
-        page_orig = get_page_content(wp, title, wp_lang)
+        wikipage = WikiPage.fetch('http://%s.wikipedia.org/wiki/%s' % (wp_lang, title))
+        page_orig = wikipage.text
         if not page_orig:
             continue
         page_title = title
-        url = 'http://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
         colored_out(bcolors.HEADER, ' * trying article %s' % (title,))
         page = mangle_name(page_orig)
 
@@ -174,11 +175,14 @@ for rg_id, rg_gid, rg_name, ac_name, rg_sec_types, processed in db.execute(query
             colored_out(bcolors.WARNING, '  => ratio too low (min = %s)' % min_ratio)
             continue
         auto = ratio > 0.75 and (rg_sec_types is None or ('Compilation' not in rg_sec_types and 'Soundtrack' not in rg_sec_types))
-        text = 'Matched based on the name. The page mentions artist "%s" and %s.' % (ac_name, join_names('track', found_tracks),)
-        colored_out(bcolors.OKGREEN, ' * linking to %s' % (url,))
+
+        wp_url = 'http://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
+        wd_url = 'http://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
+        text = 'Wikidata identifier found from matching Wikipedia page %s. The page mentions artist "%s" and %s.' % (wp_url, ac_name, join_names('track', found_tracks),)
+        colored_out(bcolors.OKGREEN, ' * linking to %s' % (wd_url,))
         out(' * edit note: %s' % (text,))
         time.sleep(5)
-        mb.add_url("release_group", rg_gid, 89, url, text, auto=auto)
+        mb.add_url("release_group", rg_gid, 353, wd_url, text, auto=auto)
         break
     if processed is None:
         db.execute("INSERT INTO bot_wp_rg_link (gid, lang) VALUES (%s, %s)", (rg_gid, wp_lang))
