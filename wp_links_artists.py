@@ -261,12 +261,13 @@ for artist in db.execute(query, query_params):
                 colored_out(bcolors.HEADER, ' * artist country (%s) not compatible with wiki language (%s)' % (country, wp_lang))
                 continue
 
-        url = 'http://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
-        text = 'Matched based on the name. The page mentions %s.' % (', '.join(reasons),)
-        colored_out(bcolors.OKGREEN, ' * linking to %s' % (url,))
+        wp_url = 'http://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
+        wd_url = 'http://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
+        text = 'Wikidata identifier found from matching Wikipedia page %s. The page mentions %s.' % (wp_url, ', '.join(reasons))
+        colored_out(bcolors.OKGREEN, ' * linking to %s' % (wd_url,))
         out(' * edit note: %s' % (text,))
         time.sleep(60)
-        mb.add_url("artist", artist['gid'], 179, url, text)
+        mb.add_url("artist", artist['gid'], 352, wd_url, text)
         break
 
     if artist['processed'] is None:
