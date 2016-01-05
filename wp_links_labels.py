@@ -96,7 +96,7 @@ for id, gid, name in db.execute(query):
         print ' * ratio: %s, has artists: %s, found artists: %s' % (ratio, len(artists), len(found_artists))
         if len(found_artists) < 2:
             continue
-        url = 'http://en.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
+        url = 'https://en.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
         text = 'Matched based on the name. The page mentions %s.' % (join_names('artist', found_artists),)
         print ' * linking to %s' % (url,)
         print ' * edit note: %s' % (text,)

@@ -177,7 +177,7 @@ for rg_id, rg_gid, rg_name, ac_name, rg_sec_types, processed in db.execute(query
         auto = ratio > 0.75 and (rg_sec_types is None or ('Compilation' not in rg_sec_types and 'Soundtrack' not in rg_sec_types))
 
         wp_url = 'http://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
-        wd_url = 'http://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
+        wd_url = 'https://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
         text = 'Wikidata identifier found from matching Wikipedia page %s. The page mentions artist "%s" and %s.' % (wp_url, ac_name, join_names('track', found_tracks),)
         colored_out(bcolors.OKGREEN, ' * linking to %s' % (wd_url,))
         out(' * edit note: %s' % (text,))

@@ -120,7 +120,7 @@ for id, gid, name in db.execute(query):
             continue
         #if ratio < min_ratio:
         #    continue
-        url = 'http://ko.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
+        url = 'https://ko.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
         text = 'Matched based on the name. The page mentions %s.' % (join_names('album', found_albums),)
         print ' * linking to %s' % (url,)
         print ' * edit note: %s' % (text,)

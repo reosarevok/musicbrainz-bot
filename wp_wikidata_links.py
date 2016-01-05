@@ -78,7 +78,7 @@ def main(ENTITY_TYPE):
 
         page = WikiPage.fetch(entity['wp_url'], False)
         if page.wikidata_id:
-            wikidata_url = 'http://www.wikidata.org/wiki/%s' % page.wikidata_id.upper()
+            wikidata_url = 'https://www.wikidata.org/wiki/%s' % page.wikidata_id.upper()
             edit_note = 'From %s' % (entity['wp_url'],)
             colored_out(bcolors.OKGREEN, ' * found Wikidata identifier:', wikidata_url)
             time.sleep(1)

@@ -262,7 +262,7 @@ for artist in db.execute(query, query_params):
                 continue
 
         wp_url = 'http://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
-        wd_url = 'http://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
+        wd_url = 'https://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
         text = 'Wikidata identifier found from matching Wikipedia page %s. The page mentions %s.' % (wp_url, ', '.join(reasons))
         colored_out(bcolors.OKGREEN, ' * linking to %s' % (wd_url,))
         out(' * edit note: %s' % (text,))
