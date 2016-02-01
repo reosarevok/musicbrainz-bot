@@ -59,7 +59,7 @@ WITH
         FROM release_group rg
         LEFT JOIN (SELECT l.entity0 AS id
             FROM l_release_group_url l
-            JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http%%://""" + wp_lang + """.wikipedia.org/wiki/%%'
+            JOIN url u ON l.entity1 = u.id AND u.url ~ '^https?://""" + wp_lang + """\.wikipedia\.org/wiki/'
             WHERE l.link IN (SELECT id FROM link WHERE link_type = 89)
         ) wpl ON wpl.id = rg.id
         LEFT JOIN (SELECT l.entity0 AS id
