@@ -19,7 +19,7 @@ db.execute("SET search_path TO musicbrainz, %s" % cfg.BOT_SCHEMA_DB)
 
 wp_lang = sys.argv[1] if len(sys.argv) > 1 else 'en'
 
-wp = MediaWiki('http://%s.wikipedia.org/w/api.php' % wp_lang)
+wp = MediaWiki('https://%s.wikipedia.org/w/api.php' % wp_lang)
 
 suffix = '_' + wp_lang if wp_lang != 'en' else ''
 wps = solr.SolrConnection('http://localhost:8983/solr/wikipedia' + suffix)
@@ -59,7 +59,7 @@ WITH
         FROM release_group rg
         LEFT JOIN (SELECT l.entity0 AS id
             FROM l_release_group_url l
-            JOIN url u ON l.entity1 = u.id AND u.url LIKE 'http%%://""" + wp_lang + """.wikipedia.org/wiki/%%'
+            JOIN url u ON l.entity1 = u.id AND u.url ~ '^https?://""" + wp_lang + """\.wikipedia\.org/wiki/'
             WHERE l.link IN (SELECT id FROM link WHERE link_type = 89)
         ) wpl ON wpl.id = rg.id
         LEFT JOIN (SELECT l.entity0 AS id
@@ -118,7 +118,7 @@ for rg_id, rg_gid, rg_name, ac_name, rg_sec_types, processed in db.execute(query
         if delay < 1.0:
             time.sleep(1.0 - delay)
         last_wp_request = time.time()
-        wikipage = WikiPage.fetch('http://%s.wikipedia.org/wiki/%s' % (wp_lang, title))
+        wikipage = WikiPage.fetch('https://%s.wikipedia.org/wiki/%s' % (wp_lang, title))
         page_orig = wikipage.text
         if not page_orig:
             continue
@@ -176,8 +176,8 @@ for rg_id, rg_gid, rg_name, ac_name, rg_sec_types, processed in db.execute(query
             continue
         auto = ratio > 0.75 and (rg_sec_types is None or ('Compilation' not in rg_sec_types and 'Soundtrack' not in rg_sec_types))
 
-        wp_url = 'http://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
-        wd_url = 'http://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
+        wp_url = 'https://%s.wikipedia.org/wiki/%s' % (wp_lang, quote_page_title(page_title),)
+        wd_url = 'https://www.wikidata.org/wiki/%s' % wikipage.wikidata_id.upper()
         text = 'Wikidata identifier found from matching Wikipedia page %s. The page mentions artist "%s" and %s.' % (wp_url, ac_name, join_names('track', found_tracks),)
         colored_out(bcolors.OKGREEN, ' * linking to %s' % (wd_url,))
         out(' * edit note: %s' % (text,))

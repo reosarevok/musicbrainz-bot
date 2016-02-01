@@ -88,7 +88,7 @@ class WikiPage(object):
         m = re.match(r'^https?://([a-z\-]+)\.wikipedia\.org/wiki/(.*)$', url)
         page_lang = m.group(1).encode('utf8')
         page_title = urllib.unquote(m.group(2).encode('utf8')).decode('utf8')
-        wp = MediaWiki('http://%s.wikipedia.org/w/api.php' % page_lang)
+        wp = MediaWiki('https://%s.wikipedia.org/w/api.php' % page_lang)
         resp = wp.call({'action': 'query', 'prop': 'pageprops|revisions', 'titles': page_title.encode('utf8'), 'rvprop': 'content'})
         page = resp['query']['pages'].values()[0]
         content = page['revisions'][0].values()[0] if 'revisions' in page else None

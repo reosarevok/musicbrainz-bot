@@ -15,7 +15,7 @@ engine = sqlalchemy.create_engine(cfg.MB_DB)
 db = engine.connect()
 db.execute("SET search_path TO musicbrainz")
 
-wp = MediaWiki('http://ko.wikipedia.org/w/api.php')
+wp = MediaWiki('https://ko.wikipedia.org/w/api.php')
 wps = solr.SolrConnection('http://localhost:8983/solr/wikipedia_ko')
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
@@ -120,7 +120,7 @@ for id, gid, name in db.execute(query):
             continue
         #if ratio < min_ratio:
         #    continue
-        url = 'http://ko.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
+        url = 'https://ko.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
         text = 'Matched based on the name. The page mentions %s.' % (join_names('album', found_albums),)
         print ' * linking to %s' % (url,)
         print ' * edit note: %s' % (text,)

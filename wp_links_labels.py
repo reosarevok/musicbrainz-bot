@@ -13,7 +13,7 @@ engine = sqlalchemy.create_engine(cfg.MB_DB)
 db = engine.connect()
 db.execute("SET search_path TO musicbrainz, %s" % cfg.BOT_SCHEMA_DB)
 
-wp = MediaWiki('http://en.wikipedia.org/w/api.php')
+wp = MediaWiki('https://en.wikipedia.org/w/api.php')
 wps = solr.SolrConnection('http://localhost:8983/solr/wikipedia')
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
@@ -96,7 +96,7 @@ for id, gid, name in db.execute(query):
         print ' * ratio: %s, has artists: %s, found artists: %s' % (ratio, len(artists), len(found_artists))
         if len(found_artists) < 2:
             continue
-        url = 'http://en.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
+        url = 'https://en.wikipedia.org/wiki/%s' % (quote_page_title(page_title),)
         text = 'Matched based on the name. The page mentions %s.' % (join_names('artist', found_artists),)
         print ' * linking to %s' % (url,)
         print ' * edit note: %s' % (text,)

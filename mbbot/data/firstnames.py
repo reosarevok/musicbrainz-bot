@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# from http://fr.wikipedia.org/wiki/Liste_des_pr%C3%A9noms_fran%C3%A7ais_et_de_la_francophonie
+# from https://fr.wikipedia.org/wiki/Liste_des_pr%C3%A9noms_fran%C3%A7ais_et_de_la_francophonie
 # with local additions
 
 firstname_gender = {}

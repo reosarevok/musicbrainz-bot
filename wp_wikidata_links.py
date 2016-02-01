@@ -51,7 +51,7 @@ def main(ENTITY_TYPE):
             SELECT DISTINCT e.id AS entity_id, e.gid AS entity_gid, u.url AS wp_url, substring(u.url from '//(([a-z]|-)+)\\.') as wp_lang
             FROM """ + entity_type_table + """ e
                 JOIN """ + url_relationship_table + """ l ON l.""" + main_entity_entity_point + """ = e.id AND l.link IN (SELECT id FROM link WHERE link_type = """ + str(WIKIPEDIA_RELATIONSHIP_TYPES[ENTITY_TYPE]) + """)
-                JOIN url u ON u.id = l.""" + url_entity_point + """ AND u.url LIKE 'http%%://%%.wikipedia.org/wiki/%%'
+                JOIN url u ON u.id = l.""" + url_entity_point + """ AND u.url ~ '^https?://[a-z-]+\.wikipedia\.org/wiki/'
             WHERE
                 /* No existing Wikidata relationship for this entity */
                 NOT EXISTS (SELECT 1 FROM """ + url_relationship_table + """ ol WHERE ol.""" + main_entity_entity_point + """ = e.id AND ol.link IN (SELECT id FROM link WHERE link_type = """ + str(WIKIDATA_RELATIONSHIP_TYPES[ENTITY_TYPE]) + """))
@@ -78,7 +78,7 @@ def main(ENTITY_TYPE):
 
         page = WikiPage.fetch(entity['wp_url'], False)
         if page.wikidata_id:
-            wikidata_url = 'http://www.wikidata.org/wiki/%s' % page.wikidata_id.upper()
+            wikidata_url = 'https://www.wikidata.org/wiki/%s' % page.wikidata_id.upper()
             edit_note = 'From %s' % (entity['wp_url'],)
             colored_out(bcolors.OKGREEN, ' * found Wikidata identifier:', wikidata_url)
             time.sleep(1)
