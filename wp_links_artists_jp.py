@@ -15,7 +15,7 @@ engine = sqlalchemy.create_engine(cfg.MB_DB)
 db = engine.connect()
 db.execute("SET search_path TO musicbrainz")
 
-wp = MediaWiki('http://ja.wikipedia.org/w/api.php')
+wp = MediaWiki('https://ja.wikipedia.org/w/api.php')
 wps = solr.SolrConnection('http://localhost:8983/solr/wikipedia_ja')
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)

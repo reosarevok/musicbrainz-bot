@@ -268,7 +268,7 @@ wp_country_links['en'] = {
 }
 
 wp_country_links['fr'] = {
-    # http://fr.wikipedia.org/wiki/ISO_3166-1
+    # https://fr.wikipedia.org/wiki/ISO_3166-1
     'Afghanistan': 'AF',
     'Afrique du Sud': 'ZA',
     'Åland': 'AX',
@@ -652,7 +652,7 @@ demonyms['en'] = {
     'Mozambican': 'MZ',
 }
 
-# see http://fr.wikipedia.org/wiki/Liste_de_gentil%C3%A9s
+# see https://fr.wikipedia.org/wiki/Liste_de_gentil%C3%A9s
 
 demonyms['fr'] = {
     'américain': 'US',
