@@ -29,18 +29,6 @@ browser.set_handle_robots(False)
 browser.set_debug_redirects(False)
 browser.set_debug_http(False)
 
-html_escape_table = {
-    u'&': u'&amp;',
-    u''': u'&quot;',
-    u''': u'&apos;',
-    u'>': u'&gt;',
-    u'<': u'&lt;',
-}
-
-
-def html_escape(text):
-    return u''.join(html_escape_table.get(c, c) for c in text)
-
 
 def main(verbose = False):
     urls = db.execute(query_bandcamp_urls_using_http)
