@@ -72,7 +72,7 @@ def main(verbose = False):
     urls = db.execute(query_bad_spotify_urls)
     for url in urls:
         if verbose:
-            print u'Working on url: %s' % (u'https://musicbrainz.org/url/' + unicode(url['gid']))
+            print u'Working on url: %s' % (cfg.MB_SITE + u'/url/' + unicode(url['gid']))
         new_url = get_spotify_url(url['url'], verbose)
         if new_url is None:
             print 'Skipping %s.' % (url['url'])
