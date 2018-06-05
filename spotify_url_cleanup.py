@@ -71,6 +71,8 @@ def get_spotify_url(url, verbose = False):
 def main(verbose = False):
     urls = db.execute(query_bad_spotify_urls)
     for url in urls:
+        if verbose:
+            print u'Working on url: %s' % (u'https://musicbrainz.org/url/' + unicode(url['gid']))
         new_url = get_spotify_url(url['url'], verbose)
         if new_url is None:
             print 'Skipping %s.' % (url['url'])
@@ -79,7 +81,6 @@ def main(verbose = False):
 
 Using `spotify_url_cleanup.py`: https://github.com/Freso/musicbrainz-bot/blob/master/spotify_url_cleanup.py"""
         if verbose:
-            print u'Working on url: %s' % (u'https://musicbrainz.org/url/' + url['gid'])
             print u'→ Changing %s to %s' % (url['url'], new_url)
         try:
             mb.edit_url(url['gid'], url['url'], new_url, edit_note, auto=False)
