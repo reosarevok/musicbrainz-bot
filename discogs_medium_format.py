@@ -95,7 +95,7 @@ DISCOGS_MB_FORMATS_MAPPING = {
 }
 
 for medium in db.execute(query):
-    colored_out(bcolors.OKBLUE, 'Looking up medium #%s of release "%s" by "%s" http://musicbrainz.org/release/%s' % (medium['medium_id'], medium['name'], medium['ac_name'], medium['gid']))
+    colored_out(bcolors.OKBLUE, 'Looking up medium #%s of release "%s" by "%s" https://musicbrainz.org/release/%s' % (medium['medium_id'], medium['name'], medium['ac_name'], medium['gid']))
 
     m = re.match(r'http://www.discogs.com/release/([0-9]+)', medium['discogs_url'])
     if m:

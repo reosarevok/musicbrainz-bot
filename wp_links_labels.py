@@ -58,7 +58,7 @@ WHERE rl.label = %s
 """
 
 for id, gid, name in db.execute(query):
-    print 'Looking up label "%s" http://musicbrainz.org/label/%s' % (name, gid)
+    print 'Looking up label "%s" https://musicbrainz.org/label/%s' % (name, gid)
     matches = wps.query(name.lower(), defType='dismax', qf='name', rows=50).results
     last_wp_request = time.time()
     for match in matches:

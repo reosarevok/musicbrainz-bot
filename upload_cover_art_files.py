@@ -21,10 +21,10 @@ FILE_RE = re.compile(r'^(?P<mbid>[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}
 class CoverArtArchiveReleaseInfo(object):
 	def __init__(self, release_id):
 		try:
-			data = urllib2.urlopen('http://coverartarchive.org/release/%s/' % release_id)
+			data = urllib2.urlopen('https://coverartarchive.org/release/%s/' % release_id)
 			self.metadata = json.load(data)
 		except urllib2.HTTPError:
-			self.metadata = {'images':  [], 'release': 'http://musicbrainz.org/release/%s' % release_id}
+			self.metadata = {'images':  [], 'release': 'https://musicbrainz.org/release/%s' % release_id}
 
 	def hasType(self, type):
 		for image in self.metadata['images']:
@@ -62,6 +62,6 @@ for file in sys.argv[1:]:
 		colored_out(bcolors.WARNING, " * Release already has an image of type '%s' => skipping" % type.lower())
 		continue
 
-	colored_out(bcolors.OKGREEN, " * Adding %s cover art to http://musicbrainz.org/release/%s" % (type, mbid))
+	colored_out(bcolors.OKGREEN, " * Adding %s cover art to https://musicbrainz.org/release/%s" % (type, mbid))
 	time.sleep(10)
 	mb.add_cover_art(mbid, file, [type], None, '', '', False)

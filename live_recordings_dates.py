@@ -47,7 +47,7 @@ for recording in db.execute(query):
 
     m = re.match(date_re, recording['comment'])
     if m is None:
-        colored_out(bcolors.WARNING, 'Skipping http://musicbrainz.org/recording/%s "%s (%s)": not matching regexp' % (recording['r_gid'], recording['name'], recording['comment']))
+        colored_out(bcolors.WARNING, 'Skipping https://musicbrainz.org/recording/%s "%s (%s)": not matching regexp' % (recording['r_gid'], recording['name'], recording['comment']))
     else:
         date = {'year': int(m.group(1))}
 
@@ -56,7 +56,7 @@ for recording in db.execute(query):
         if m.group(3) is not None:
             date['day'] = int(m.group(3))
 
-        colored_out(bcolors.OKBLUE, 'Setting performance relationships dates of http://musicbrainz.org/recording/%s "%s (%s)"' % (recording['r_gid'], recording['name'], recording['comment']))
+        colored_out(bcolors.OKBLUE, 'Setting performance relationships dates of https://musicbrainz.org/recording/%s "%s (%s)"' % (recording['r_gid'], recording['name'], recording['comment']))
 
         attributes = {}
         edit_note = 'Setting relationship dates from recording comment: "%s"' % recording['comment']

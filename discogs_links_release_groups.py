@@ -132,7 +132,7 @@ def main(verbose=False):
         urls = set(url for url, in db.execute(query_rg_release_discogs, rg))
         if verbose:
             out(u'%d/%d - %.2f%%' % (i + 1, count, (i + 1) * 100.0 / count))
-            out(u'%s http://musicbrainz.org/release-group/%s' % (name, gid))
+            out(u'%s https://musicbrainz.org/release-group/%s' % (name, gid))
         try:
             masters = list(discogs_get_master(urls))
         except (discogs.HTTPError, discogs.requests.ConnectionError) as e:
@@ -170,7 +170,7 @@ def main(verbose=False):
             text = u'There is one Discogs link in this release group, and it points to this master URL.\n%s\n' % list(urls)[0]
         text += u'Also, the name of the Discogs master “%s” (by %s) is similar to the release group name.' % (master_name, master_artists)
         try:
-            out(u'http://musicbrainz.org/release-group/%s  ->  %s' % (gid, master_url))
+            out(u'https://musicbrainz.org/release-group/%s  ->  %s' % (gid, master_url))
             mb.add_url('release_group', gid, 90, master_url, text, auto=(len(urls) >= 2))
             db.execute("INSERT INTO bot_discogs_release_group_set (gid,url) VALUES (%s,%s)", (gid, master_url))
         except (urllib2.HTTPError, urllib2.URLError, socket.timeout) as e:

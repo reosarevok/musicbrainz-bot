@@ -64,7 +64,7 @@ for artist in db.execute(query):
     if artist['gid'] in matched_artists:
         continue
 
-    colored_out(bcolors.OKBLUE, 'Looking up artist "%s" http://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
+    colored_out(bcolors.OKBLUE, 'Looking up artist "%s" https://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
 
     m = re.match(r'http://www.secondhandsongs.com/work/([0-9]+)', artist['shs_url'])
     if m:
@@ -106,7 +106,7 @@ for artist in db.execute(query):
     if artist_uri:
         matched_artists.add(artist['gid'])
         colored_out(bcolors.HEADER, ' * using %s, found artist SHS URL: %s' % (artist['shs_url'], artist_uri))
-        edit_note = 'Guessing artist SecondHandSongs URL from work http://musicbrainz.org/work/%s linked to %s' % (artist['work_gid'], artist['shs_url'])
+        edit_note = 'Guessing artist SecondHandSongs URL from work https://musicbrainz.org/work/%s linked to %s' % (artist['work_gid'], artist['shs_url'])
         out(' * edit note: %s' % (edit_note,))
         
         mb.add_url('artist', artist['gid'], str(307), artist_uri, edit_note)

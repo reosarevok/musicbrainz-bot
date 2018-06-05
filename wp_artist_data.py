@@ -96,7 +96,7 @@ def main():
         if artist['id'] in seen:
             continue
         seen.add(artist['id'])
-        colored_out(bcolors.OKBLUE, 'Looking up artist "%s" http://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
+        colored_out(bcolors.OKBLUE, 'Looking up artist "%s" https://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
         out(' * wiki:', artist['url'])
 
         artist = dict(artist)

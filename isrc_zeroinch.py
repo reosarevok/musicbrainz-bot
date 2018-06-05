@@ -31,7 +31,7 @@ CREATE TABLE bot_isrc_zeroinch_problematic (
 
 
 class MusicBrainzWebservice(object):
-    def __init__(self, username, password, server='http://musicbrainz.org'):
+    def __init__(self, username, password, server='https://musicbrainz.org'):
         self.user_agent = 'zeroinch-bot/1.0 ( %s/user/%s )' % (server, username)
         self.ws = WebService(userAgent=self.user_agent, host=re.sub(r'^http://', '', server), username=username, password=password)
         self.q = Query(self.ws)
@@ -155,7 +155,7 @@ for artists in zeroinch.get_artists('/catalogue', cipher='all', page='1'):
                     if identifier != barcode.lstrip('0'):
                         out('barcode does not match, aborting!')
                         continue
-                    out('http://musicbrainz.org/release/%s' % gid)
+                    out('https://musicbrainz.org/release/%s' % gid)
                     mb_release = ws.get_release(gid)
                     mb_tracks = mb_release.getTracks()
                     if len(mb_tracks) != len(tracks):

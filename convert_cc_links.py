@@ -68,7 +68,7 @@ def main(verbose=False):
         #    continue
         if verbose:
             out(u'%d/%d - %.2f%%' % (i, count, i * 100.0 / count))
-            out(u'%s - http://musicbrainz.org/release/%s - %s' % (name, gid, url))
+            out(u'%s - https://musicbrainz.org/release/%s - %s' % (name, gid, url))
         if re.match(r'http://([^/]+\.)?magnatune\.com/', url):
             license_urls = set([u'http://creativecommons.org/licenses/by-nc-sa/1.0/'])
         else:

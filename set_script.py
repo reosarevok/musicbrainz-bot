@@ -95,7 +95,7 @@ def main(verbose=False):
         medium_names = u''.join(medium_name for (medium_name,) in db.execute(query_medium_names, release) if medium_name)
         if len(track_names) < 5:
             if verbose:
-                out('too short http://musicbrainz.org/release/%s' % gid)
+                out('too short https://musicbrainz.org/release/%s' % gid)
             continue
         scripts = get_scripts(track_names + medium_names + release_name)
         scripts_sorted = sorted(scripts.iteritems(), key=operator.itemgetter(1), reverse=True)
@@ -106,7 +106,7 @@ def main(verbose=False):
             #    continue
             if script in whitelisted_iso_codes and old_script_id != iso15924_to_mb[script]['id']:
                 if verbose:
-                    out('http://musicbrainz.org/release/%s' % gid)
+                    out('https://musicbrainz.org/release/%s' % gid)
                     out('%s -> %s' % (mb_to_iso15924[old_script_id] if old_script_id else '', script))
                 r_by_ac[ac].append((gid, old_script_id, script, scripts))
     if verbose:
@@ -121,7 +121,7 @@ def main(verbose=False):
     for i, (gid, old_script_id, new_script, script_stats) in enumerate(r_flat):
         if verbose:
             out('%d/%d - %.2f%%' % (i + 1, count, (i + 1) * 100.0 / count))
-        out('http://musicbrainz.org/release/%s %s -> %s' % (gid, mb_to_iso15924[old_script_id] if old_script_id else '', new_script))
+        out('https://musicbrainz.org/release/%s %s -> %s' % (gid, mb_to_iso15924[old_script_id] if old_script_id else '', new_script))
         new_script_name = iso15924_to_mb[new_script]['name']
         new_script_id = iso15924_to_mb[new_script]['id']
         text = u'I’m setting this to “%s” because it is the predominant script on the tracklist (>40%%), and no other (determined) script is on the tracklist.' % new_script_name

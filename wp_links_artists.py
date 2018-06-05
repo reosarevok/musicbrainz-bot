@@ -158,7 +158,7 @@ WHERE a.id IN (
 """
 
 for artist in db.execute(query, query_params):
-    colored_out(bcolors.OKBLUE, 'Looking up artist "%s" http://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
+    colored_out(bcolors.OKBLUE, 'Looking up artist "%s" https://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
     matches = wps.query(escape_query(artist['name']), defType='dismax', qf='name', rows=50).results
     last_wp_request = time.time()
     for match in matches:

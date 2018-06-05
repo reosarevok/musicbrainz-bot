@@ -84,7 +84,7 @@ SHS_MB_LANG_MAPPING = {
 }
 
 for work in db.execute(query):
-    colored_out(bcolors.OKBLUE, 'Looking up work "%s" http://musicbrainz.org/work/%s' % (work['name'], work['gid']))
+    colored_out(bcolors.OKBLUE, 'Looking up work "%s" https://musicbrainz.org/work/%s' % (work['name'], work['gid']))
 
     m = re.match(r'http://www.secondhandsongs.com/work/([0-9]+)', work['shs_url'])
     if m:

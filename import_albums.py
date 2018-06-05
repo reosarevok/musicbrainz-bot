@@ -60,7 +60,7 @@ for album in db.albums.find({'status': {'imported': False}})[:1]:
     print 'added release', mbid
 
     #form = album_to_form(album)
-    #print '<form action="http://musicbrainz.org/release/add" method="post">'
+    #print '<form action="https://musicbrainz.org/release/add" method="post">'
     #for name, value in form.iteritems():
     #    print '<input type="hidden" name="%s" value="%s" />' % (html_escape(name), html_escape(unicode(value)))
     #print '<input type="submit" value="Add Release">'

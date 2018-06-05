@@ -181,9 +181,9 @@ def main(verbose=False):
             continue
         if verbose:
             out(u'%d/%d - %.2f%%' % (i + 1, count, (i + 1) * 100.0 / count))
-            out('http://musicbrainz.org/release/%s (%d-%d)' % (r_gid, m_pos, t_pos))
+            out('https://musicbrainz.org/release/%s (%d-%d)' % (r_gid, m_pos, t_pos))
             out('%s' % url)
-            out('http://musicbrainz.org/artist/%s' % a_gid)
+            out('https://musicbrainz.org/artist/%s' % a_gid)
         discogs_release_id = int(re.match(r'^http://www\.discogs\.com/release/([0-9]+)', url).group(1))
         discogs_release = discogs.release(discogs_release_id)
         t_index = 0
@@ -239,9 +239,9 @@ def main(verbose=False):
         text = u'Artist appears on only one release [1] (medium %d, track %d), which is linked to discogs release [2]. Also, the track names are similar:\n' % (m_pos, t_pos)
         text += u'Discogs: “%s” by %s\n' % (discogs_track['title'], combine_names([x.name for x in discogs_artists]))
         text += u'MBrainz: “%s” by “%s”\n\n' % (t_name, ac_name)
-        text += u'[1] http://musicbrainz.org/release/%s\n[2] %s' % (r_gid, url)
+        text += u'[1] https://musicbrainz.org/release/%s\n[2] %s' % (r_gid, url)
         try:
-            out(u'http://musicbrainz.org/artist/%s  ->  %s' % (a_gid, discogs_url))
+            out(u'https://musicbrainz.org/artist/%s  ->  %s' % (a_gid, discogs_url))
             mb.add_url('artist', a_gid, 180, discogs_url.encode('utf-8'), text)
             db.execute("INSERT INTO bot_discogs_artist_set (gid,url) VALUES (%s,%s)", (a_gid, discogs_url))
         except (urllib2.HTTPError, urllib2.URLError, socket.timeout) as e:

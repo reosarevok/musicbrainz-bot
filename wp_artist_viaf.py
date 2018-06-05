@@ -67,7 +67,7 @@ def main():
         if artist['gid'] in matched:
             continue
 
-        colored_out(bcolors.OKBLUE, 'Looking up artist "%s" http://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
+        colored_out(bcolors.OKBLUE, 'Looking up artist "%s" https://musicbrainz.org/artist/%s' % (artist['name'], artist['gid']))
         out(' * wiki:', artist['wp_url'])
 
         page = WikiPage.fetch(artist['wp_url'], False)

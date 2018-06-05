@@ -107,7 +107,7 @@ category_re['en'] = re.compile(r'\[\[Category:(.+?)(?:\|.*?)?\]\]')
 category_re['fr'] = re.compile(r'\[\[Cat\xe9gorie:(.+?)\]\]')
 
 for rg_id, rg_gid, rg_name, ac_name, rg_sec_types, processed in db.execute(query, query_params):
-    colored_out(bcolors.OKBLUE, 'Looking up release group "%s" http://musicbrainz.org/release-group/%s' % (rg_name, rg_gid))
+    colored_out(bcolors.OKBLUE, 'Looking up release group "%s" https://musicbrainz.org/release-group/%s' % (rg_name, rg_gid))
     matches = wps.query(escape_query(rg_name), defType='dismax', qf='name', rows=100).results
     last_wp_request = time.time()
     for match in matches:

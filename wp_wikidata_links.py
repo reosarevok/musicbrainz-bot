@@ -73,7 +73,7 @@ def main(ENTITY_TYPE):
         if entity['gid'] in matched:
             continue
 
-        colored_out(bcolors.OKBLUE, 'Looking up entity "%s" http://musicbrainz.org/%s/%s' % (entity['name'], ENTITY_TYPE, entity['gid']))
+        colored_out(bcolors.OKBLUE, 'Looking up entity "%s" https://musicbrainz.org/%s/%s' % (entity['name'], ENTITY_TYPE, entity['gid']))
         out(' * wiki:', entity['wp_url'])
 
         page = WikiPage.fetch(entity['wp_url'], False)

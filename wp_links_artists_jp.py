@@ -77,7 +77,7 @@ for id, gid, name in db.execute(query):
         skipped += 1
         db.execute("INSERT INTO bot_wp_artist_ja (gid) VALUES (%s)", (gid,))
         continue
-    print 'Looking up artist "%s" http://musicbrainz.org/artist/%s' % (name, gid)
+    print 'Looking up artist "%s" https://musicbrainz.org/artist/%s' % (name, gid)
     matches = wps.query(name, defType='dismax', qf='name', rows=50).results
     last_wp_request = time.time()
     for match in matches:

@@ -143,7 +143,7 @@ for release in db.execute(query_releases_wo_isrcs):
 
     mb_release = dict(release)
 
-    colored_out(bcolors.OKBLUE, 'Looking up release "%s" http://musicbrainz.org/release/%s' % (mb_release['name'], mb_release['gid']))
+    colored_out(bcolors.OKBLUE, 'Looking up release "%s" https://musicbrainz.org/release/%s' % (mb_release['name'], mb_release['gid']))
 
     sp_albums = sws.search_albums('upc:%s' % mb_release['barcode'])
     if len(sp_albums) != 1:

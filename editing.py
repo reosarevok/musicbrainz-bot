@@ -68,7 +68,7 @@ def album_to_form(album):
 
 class MusicBrainzClient(object):
 
-    def __init__(self, username, password, server="http://musicbrainz.org", editor_id=None):
+    def __init__(self, username, password, server="https://musicbrainz.org", editor_id=None):
         self.server = server
         self.username = username
         self.editor_id = editor_id
@@ -405,7 +405,7 @@ class MusicBrainzClient(object):
 
 class MusicBrainzWebdriverClient(object):
 
-    def __init__(self, username, password, server="http://musicbrainz.org", editor_id=None, headless=True):
+    def __init__(self, username, password, server="https://musicbrainz.org", editor_id=None, headless=True):
         if headless and Display is not None:
             self.display = Display(visible=0, size=(800, 600))
             self.display.start()

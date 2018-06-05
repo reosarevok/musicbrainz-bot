@@ -81,7 +81,7 @@ def discogs_get_tracklist(release_url):
     return None
 
 for release in db.execute(query):
-    colored_out(bcolors.OKBLUE, 'Looking up release "%s" by "%s" http://musicbrainz.org/release/%s' % (release['name'], release['ac_name'], release['gid']))
+    colored_out(bcolors.OKBLUE, 'Looking up release "%s" by "%s" https://musicbrainz.org/release/%s' % (release['name'], release['ac_name'], release['gid']))
 
     discogs_tracks = discogs_get_tracklist(release['discogs_url'])
     if (len(discogs_tracks) != release['track_count']):

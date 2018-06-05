@@ -251,7 +251,7 @@ def submit_cover_art(release, url, types):
         save_processed(release, url)
 
 for release in db.execute(query):
-    colored_out(bcolors.OKBLUE, 'Examining release "%s" by "%s" http://musicbrainz.org/release/%s' % (release['name'], release['artist'], release['gid']))
+    colored_out(bcolors.OKBLUE, 'Examining release "%s" by "%s" https://musicbrainz.org/release/%s' % (release['name'], release['artist'], release['gid']))
 
     # Front cover
     # Start with Discogs if available
