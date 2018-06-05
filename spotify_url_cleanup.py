@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from optparse import OptionParser
-from collections import defaultdict
-from urlparse import urlparse, ParseResult
+from urlparse import urlparse
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -32,18 +31,13 @@ WHERE edits_pending = 0 AND (
      OR url LIKE 'http://play.spotify.com/%%/%%'
      OR url LIKE 'https://play.spotify.com/%%/%%'
 )
-ORDER BY id ASC LIMIT 3
+ORDER BY id ASC
 '''
 
 browser = mechanize.Browser()
 browser.set_handle_robots(False)
 browser.set_debug_redirects(False)
 browser.set_debug_http(False)
-
-
-def _spotify_entity_method(entity_type):
-    """Helper method to figure out which Spotipy call to use."""
-    return u'sp.' + entity_type
 
 
 def get_spotify_url(url, verbose = False):
@@ -70,6 +64,7 @@ def get_spotify_url(url, verbose = False):
         return None
     return entity['external_urls']['spotify']
 
+
 def main(verbose = False):
     urls = db.execute(query_bad_spotify_urls)
     for url in urls:
@@ -81,7 +76,7 @@ def main(verbose = False):
 
 Using `spotify_url_cleanup.py`: https://github.com/Freso/musicbrainz-bot/blob/master/spotify_url_cleanup.py"""
         if verbose:
-            print u'Working on url: %s' % (url)
+            print u'Working on url: %s' % (u'https://musicbrainz.org/url/' + url['gid'])
             print u'→ Changing %s to %s' % (url['url'], new_url)
         try:
             mb.edit_url(url['gid'], url['url'], new_url, edit_note, auto=False)
