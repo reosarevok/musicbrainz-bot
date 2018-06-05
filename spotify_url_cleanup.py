@@ -62,6 +62,9 @@ def get_spotify_url(url, verbose = False):
     except spotipy.client.SpotifyException as e:
         print 'Error looking up entity at Spotify: %s (for %s)' % (e, url)
         return None
+    except Exception as e:
+        print 'Some other error caught: %s' % (e)
+        return None
     return entity['external_urls']['spotify']
 
 
