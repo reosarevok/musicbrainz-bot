@@ -70,6 +70,8 @@ def get_spotify_url(url, verbose = False):
 
 def main(verbose = False):
     urls = db.execute(query_bad_spotify_urls)
+    if verbose:
+        print u'Found %s URLs!' % (urls.rowcount)
     for url in urls:
         if verbose:
             print u'Working on url: %s' % (cfg.MB_SITE + u'/url/' + unicode(url['gid']))
