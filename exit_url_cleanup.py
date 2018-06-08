@@ -19,7 +19,7 @@ mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 query_exit_urls = '''
 SELECT * FROM musicbrainz.url
 WHERE edits_pending = 0
-    AND url SIMILAR TO 'http(s|)://(vk.com/away.php\\?to|exit.sc/\\?url)=http(s|)\\%%3A\\%%2F\\%%2F%%'
+    AND url SIMILAR TO 'http(s|)://(www.|)(vk.com/away.php\\?to|exit.sc/\\?url|facebook.com/l.php\\?u)=http(s|)\\%%3A\\%%2F\\%%2F%%'
 '''
 
 browser = mechanize.Browser()
