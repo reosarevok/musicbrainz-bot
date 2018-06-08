@@ -20,11 +20,12 @@ exit_url_query_sites = [
     'vk.com/away.php',
     'exit.sc/',
     'facebook.com/l.php',
+    'google.(at|be|ca|ch|co.(bw|il|uk)|com(|.(ar|au|br|eg|tr|tw))|cl|de|dk|es|fr|nl|pl|se)/url',
 ]
 
 exit_url_query_params = [
     'to',  # used by vk.com/away.php
-    'url',  # used by exit.sc/
+    'url',  # used by exit.sc/ and google.*/url
     'u',  # used by facebook.com/l.php
 ]
 
