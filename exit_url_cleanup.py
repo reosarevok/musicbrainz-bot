@@ -73,6 +73,8 @@ def get_target_url(url, verbose=False):
 
 
 def main(verbose = False):
+    if verbose:
+        print 'Finding URLs using SQL query:', query_exit_urls
     urls = db.execute(query_exit_urls)
     if verbose:
         print u'Found %s URLs!' % (urls.rowcount)
