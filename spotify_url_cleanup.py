@@ -69,6 +69,9 @@ def get_spotify_url(url, verbose = False):
 
 
 def main(verbose = False):
+    edit_note = """Fixing Spotify URL.
+
+    Using `spotify_url_cleanup.py`: https://github.com/Freso/musicbrainz-bot/blob/master/spotify_url_cleanup.py"""
     urls = db.execute(query_bad_spotify_urls)
     if verbose:
         print u'Found %s URLs!' % (urls.rowcount)
@@ -79,9 +82,6 @@ def main(verbose = False):
         if new_url is None:
             print 'Skipping %s.' % (url['url'])
             continue
-        edit_note = """Fixing Spotify URL.
-
-Using `spotify_url_cleanup.py`: https://github.com/Freso/musicbrainz-bot/blob/master/spotify_url_cleanup.py"""
         if verbose:
             print u'→ Changing %s to %s' % (url['url'], new_url)
         try:

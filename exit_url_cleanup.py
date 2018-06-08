@@ -81,6 +81,9 @@ def get_target_url(url, verbose=False):
 
 
 def main(verbose = False):
+    edit_note = """Cleaning exit URL.
+
+    Using `exit_url_cleanup.py`: https://github.com/Freso/musicbrainz-bot/blob/master/exit_url_cleanup.py"""
     if verbose:
         print 'Finding URLs using SQL query:', query_exit_urls
     urls = db.execute(query_exit_urls)
@@ -93,9 +96,6 @@ def main(verbose = False):
         if new_url is None:
             print 'Skipping %s.' % (url['url'])
             continue
-        edit_note = """Cleaning exit URL.
-
-Using `exit_url_cleanup.py`: https://github.com/Freso/musicbrainz-bot/blob/master/exit_url_cleanup.py"""
         if verbose:
             print u'Changing %s to %s' % (url['url'], new_url)
         try:
