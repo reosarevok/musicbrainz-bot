@@ -16,11 +16,26 @@ db.execute('SET search_path TO musicbrainz')
 
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
-query_exit_urls = '''
+exit_url_query_sites = [
+    'vk.com/away.php',
+    'exit.sc/',
+    'facebook.com/l.php',
+]
+
+exit_url_query_params = [
+    'to',  # used by vk.com/away.php
+    'url',  # used by exit.sc/
+    'u',  # used by facebook.com/l.php
+]
+
+query_exit_urls = sqlalchemy.text('''
 SELECT * FROM musicbrainz.url
 WHERE edits_pending = 0
-    AND url SIMILAR TO 'http(s|)://(www.|)(vk.com/away.php\\?to|exit.sc/\\?url|facebook.com/l.php\\?u)=http(s|)\\%%3A\\%%2F\\%%2F%%'
-'''
+    AND url SIMILAR TO 'http(s|)://(www.|)({sites})\?%({params})=http(s|)%\%3A\%2F\%2F%'
+'''.format(
+    sites='|'.join(exit_url_query_sites),
+    params='|'.join(exit_url_query_params),
+))
 
 browser = mechanize.Browser()
 browser.set_handle_robots(False)
