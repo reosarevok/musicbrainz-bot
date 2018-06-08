@@ -19,14 +19,22 @@ mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 exit_url_query_sites = [
     'vk.com/away.php',
     'exit.sc/',
-    'facebook.com/l.php',
-    'google.(at|be|ca|ch|co.(bw|il|uk)|com(|.(ar|au|br|eg|tr|tw))|cl|de|dk|es|fr|nl|pl|se)/url',
+    'facebook.com/(l|confirmemail|login).php',
+    '(encrypted.|)google.(at|be|ca|ch|co.(bw|il|uk)|com(|.(ar|au|br|eg|tr|tw))|cl|de|dk|es|fr|nl|pl|se)/url',
+    'l.instagram.com/',
+    'youtube.com/redirect',
+    'linkedin.com/authwall',
+    'mora.jp/cart',
 ]
 
 exit_url_query_params = [
     'to',  # used by vk.com/away.php
     'url',  # used by exit.sc/ and google.*/url
-    'u',  # used by facebook.com/l.php
+    'u',  # used by facebook.com/l.php and l.instagram.com/
+    'next',  # used by facebook.com/(confirmemail|login).php
+    'q',  # used by youtube.com/redirect
+    'sessionRedirect',  # used by linkedin.com/authwall
+    'returnUrl',  # used by mora.jp/cart
 ]
 
 query_exit_urls = sqlalchemy.text('''
