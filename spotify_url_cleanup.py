@@ -25,7 +25,7 @@ sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
     client_secret=cfg.SPOTIFY_CLIENT_SECRET))
 
 query_bad_spotify_urls = '''
-SELECT * FROM musicbrainz.url
+SELECT gid, url FROM musicbrainz.url
 WHERE edits_pending = 0 AND (
         url LIKE 'http://open.spotify.com/%%/%%'
      OR url LIKE 'http://play.spotify.com/%%/%%'

@@ -38,7 +38,7 @@ exit_url_query_params = [
 ]
 
 query_exit_urls = sqlalchemy.text('''
-SELECT * FROM musicbrainz.url
+SELECT gid, url FROM musicbrainz.url
 WHERE edits_pending = 0
     AND url SIMILAR TO 'http(s|)://(www.|)({sites})\?%({params})=http(s|)%\%3A\%2F\%2F%'
 '''.format(
