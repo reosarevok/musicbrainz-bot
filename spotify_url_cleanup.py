@@ -27,9 +27,10 @@ sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
 query_bad_spotify_urls = '''
 SELECT gid, url FROM musicbrainz.url
 WHERE edits_pending = 0 AND (
-        url LIKE 'http://open.spotify.com/%%/%%'
-     OR url LIKE 'http://play.spotify.com/%%/%%'
-     OR url LIKE 'https://play.spotify.com/%%/%%'
+    -- Badly formatted URLs 👎
+    url SIMILAR TO 'http(s|)://((open|play).|)spotify.com/(artist|album|track)/[a-zA-Z0-9]*%%'
+    -- Well formatted URLs 👍
+    AND url NOT SIMILAR TO 'https://open.spotify.com/(artist|album|track)/[a-zA-Z0-9]*'
 )
 ORDER BY id ASC
 '''
