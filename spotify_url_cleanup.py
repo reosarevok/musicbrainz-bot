@@ -28,7 +28,7 @@ query_bad_spotify_urls = '''
 SELECT gid, url FROM musicbrainz.url
 WHERE edits_pending = 0 AND (
     -- Badly formatted URLs 👎
-    url SIMILAR TO 'http(s|)://((open|play).|)spotify.com/(artist|album|track)/[a-zA-Z0-9]*%%'
+    url SIMILAR TO 'http(s|)://(www.|)((open|play(|er)).|)spotify.com/(artist|album|track)/[a-zA-Z0-9]*%%'
     -- Well formatted URLs 👍
     AND url NOT SIMILAR TO 'https://open.spotify.com/(artist|album|track)/[a-zA-Z0-9]*'
 )
