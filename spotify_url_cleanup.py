@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from optparse import OptionParser
-from urlparse import urlparse
+from urlparse import urlparse, urlunparse
 
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -55,6 +55,14 @@ def get_spotify_url(url, verbose = False):
     if verbose:
         print "parsed_url is", parsed_url
         print "entity_type is", entity_type
+    if entity_type == 'album' and len(parsed_url.path.split('/')) == 4:
+        # E.g., "https://open.spotify.com/album/6P2k1pf9FrUjPqgiyPB6X1/2pIYXQg6z2ktVJPeyB74b1"
+        url = urlunparse((
+            parsed_url.scheme,
+            parsed_url.netloc,
+            '/'.join(parsed_url.path.split('/')[:3]),
+            None, None, None
+        ))
     try:
         entity = getattr(sp, entity_type)(url)
     except AttributeError:
