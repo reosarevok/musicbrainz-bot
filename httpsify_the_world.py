@@ -26,6 +26,7 @@ query_http_urls = sqlalchemy.text('''
 SELECT gid, url FROM musicbrainz.url
 WHERE edits_pending = 0
     AND url SIMILAR TO 'http://(www.|)({sites})/%'
+LIMIT 200
 '''.format(
     sites='|'.join(https_domains),
 ))
