@@ -19,6 +19,7 @@ mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 https_domains = [
     'music.monstercat.com',
     'open.spotify.com',
+    'secondhandsongs.com',
 ]
 
 query_http_urls = sqlalchemy.text('''
