@@ -17,6 +17,7 @@ db.execute('SET search_path TO musicbrainz')
 mb = MusicBrainzClient(cfg.MB_USERNAME, cfg.MB_PASSWORD, cfg.MB_SITE)
 
 https_domains = [
+    '%.bandcamp.com',
     'music.monstercat.com',
     'open.spotify.com',
     'secondhandsongs.com',
